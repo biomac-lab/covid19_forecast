@@ -11,8 +11,11 @@ from numpyro.infer import MCMC, NUTS, Predictive
 import pandas as pd
 import matplotlib.pyplot as plt
 
-'''Utility to define access method for time varying fields'''
 def getter(f):
+    '''
+    Utility to define access method for time varying fields
+    '''
+
     def get(self, samples, forecast=False):
         return samples[f + '_future'] if forecast else self.combine_samples(samples, f)
     return get
@@ -25,7 +28,9 @@ class CompartmentModel(object):
 
     @classmethod
     def dx_dt(cls, x, *args):
-        '''Compute time derivative'''
+        '''
+        Compute time derivative
+        '''
         raise NotImplementedError()
         return
 
@@ -156,7 +161,7 @@ class SEIRModel(CompartmentModel):
         dE_dt = beta * S * I / N - sigma * E
         dI_dt = sigma * E - gamma * I
         dR_dt = gamma * I
-        dC_dt = sigma * E  # cumulative infections
+        dC_dt = sigma * E  # incidence
 
         return np.stack([dS_dt, dE_dt, dI_dt, dR_dt, dC_dt])
 
@@ -313,6 +318,7 @@ class Model():
         if f_future in samples and use_future:
             data = np.concatenate((data, samples[f_future]), axis=1)
         return data
+
     def get(self, samples, c, **kwargs):
 
         forecast = kwargs.get('forecast', False)
@@ -349,7 +355,7 @@ class Model():
     def plot_samples(self,
                      samples,
                      plot_fields=['y'],
-                     start='2020-03-04',
+                     start='2020-03-06',
                      T=None,
                      ax=None,
                      legend=True,
@@ -357,10 +363,8 @@ class Model():
                      n_samples=0,
                      intervals=[50, 80, 95]):
         '''
-        Plotting method for SIR-type models. 
+        Plotting method for SIR-type models.
         '''
-
-
         ax = plt.axes(ax)
 
         T_data = self.horizon(samples, forecast=forecast)
@@ -606,7 +610,7 @@ class SEIRDModel(SEIRModel):
         dH_dt = death_prob * gamma * I - death_rate * H
         dD_dt = death_rate * H
         dR_dt = gamma * (1 - death_prob) * I
-        dC_dt = sigma * E  # cumulative infections
+        dC_dt = sigma * E  # incidence
 
         return np.stack([dS_dt, dE_dt, dI_dt, dR_dt, dH_dt, dD_dt, dC_dt])
 
@@ -811,7 +815,6 @@ class SEIRD(SEIRDBase):
 
     def dynamics(self, T, params, x0, num_frozen=0, confirmed=None, death=None, suffix=""):
         '''Run SEIRD dynamics for T time steps'''
-
         beta0, \
         sigma, \
         gamma, \
