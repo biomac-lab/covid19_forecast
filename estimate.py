@@ -23,10 +23,8 @@ data = data.resample('D').sum().fillna(0)[['num_cases','num_diseased']]
 data  = prepare_cases(data, col='num_cases', cutoff=0)    # .rename({'smoothed_num_cases':'num_cases'})
 data  = prepare_cases(data, col='num_diseased', cutoff=0) # .rename({'smoothed_num_cases':'num_cases'})
 
+data = data.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_diseased':'death'})[['confirmed', 'death']]
 
-data = data.rename(columns={'num_cases': 'confirmed', 'num_diseased':'death'})[['confirmed', 'death']]
-data = prepare_cases(data, col='confirmed')
-data = prepare_cases(data, col='death')
 
 data = data.iloc[:-11]
 
@@ -39,11 +37,11 @@ model = SEIRD(
 
 
 T_future = 27
-path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
+path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', 'smoohted_'+pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
 if not os.path.exists(path_to_save):
     os.makedirs(path_to_save)
 
-samples = model.infer(num_warmup=400, num_samples=2000)
+samples = model.infer(num_warmup=400, num_samples=2000, num_chains=1)
 
 # In-sample posterior predictive samples (don't condition on observations)
 print(" * collecting in-sample predictive samples")
@@ -52,17 +50,22 @@ post_pred_samples = model.predictive()
 print(" * collecting forecast samples")
 forecast_samples = model.forecast(T_future=T_future)
 
-save_fields=['beta0', 'beta', 'sigma', 'gamma', 'dy0', 'dy', 'mean_dy',  'dy_future', 'mean_dy_future',
-                'dz0', 'dz', 'dz_future', 'mean_dz', 'mean_dz_future',
+save_fields=['beta0', 'beta', 'sigma', 'gamma', 'dy0', 'dy', 'mean_dy', 'mean_dy0',  'dy_future', 'mean_dy_future',
+                'dz0', 'dz', 'dz_future', 'mean_dz', 'mean_dz0', 'mean_dz_future',
                 'y0', 'y', 'y_future', 'z0', 'z', 'z_future' ]
 
-def trim(d):
+def trim(d, fields):
     if d is not None:
-        d = {k : v for k, v in d.items() if k in save_fields}
+        d = {k : v for k, v in d.items() if k in fields}
     return d
 
+#np.savez_compressed(os.path.join(path_to_save, 'samples.npz'),
+#                        mcmc_samples = trim(samples, save_fields),
+#                        post_pred_samples = trim(post_pred_samples, save_fields),
+#                        forecast_samples = trim(forecast_samples, save_fields))
+
 np.savez_compressed(os.path.join(path_to_save, 'samples.npz'),
-                        mcmc_samples = trim(samples),
-                        post_pred_samples = trim(post_pred_samples),
-                        forecast_samples = trim(forecast_samples))
+                        mcmc_samples = samples,
+                        post_pred_samples = post_pred_samples,
+                        forecast_samples = forecast_samples)
 
