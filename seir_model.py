@@ -19,10 +19,8 @@ def getter(f):
 
 class CompartmentModel(object):
     '''
-    Base class for compartment models. 
-
-    As of 4/1/2020 there is no state to these objects, so all method
-    are class methods.
+    Base class for compartment models.
+    All class methods
     '''
 
     @classmethod
@@ -231,12 +229,12 @@ class Model():
 
         kernel = NUTS(self, init_strategy = numpyro.infer.initialization.init_to_uniform())
 
-        mcmc = MCMC(kernel, 
-                    num_warmup=num_warmup, 
-                    num_samples=num_samples, 
+        mcmc = MCMC(kernel,
+                    num_warmup=num_warmup,
+                    num_samples=num_samples,
                     num_chains=num_chains)
 
-        mcmc.run(rng_key, **self.obs, **args)    
+        mcmc.run(rng_key, **self.obs, **args)
         mcmc.print_summary()
 
         self.mcmc = mcmc
@@ -692,15 +690,15 @@ class SEIRD(SEIRDBase):
 
         # Sample dispersion parameters around specified values
 
-        death_dispersion = numpyro.sample("death_dispersion", 
+        death_dispersion = numpyro.sample("death_dispersion",
                                            dist.TruncatedNormal(low=0.1,
-                                                                loc=death_dispersion, 
+                                                                loc=death_dispersion,
                                                                 scale=0.15))
 
 
-        confirmed_dispersion = numpyro.sample("confirmed_dispersion", 
+        confirmed_dispersion = numpyro.sample("confirmed_dispersion",
                                               dist.TruncatedNormal(low=0.1,
-                                                                   loc=confirmed_dispersion, 
+                                                                   loc=confirmed_dispersion,
                                                                    scale=0.15))
 
 
@@ -833,8 +831,8 @@ class SEIRD(SEIRDBase):
         beta = numpyro.deterministic("beta", beta0 * np.exp(rw_scale*rw))
 
         det_prob = numpyro.sample("det_prob" + suffix,
-                                  LogisticRandomWalk(loc=det_prob0, 
-                                                     scale=rw_scale, 
+                                  LogisticRandomWalk(loc=det_prob0,
+                                                     scale=rw_scale,
                                                      drift=0.,
                                                      num_steps=T-1))
 
