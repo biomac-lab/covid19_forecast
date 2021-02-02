@@ -15,7 +15,6 @@ data_dir            = config.get_property('data_dir_covid')
 geo_dir             = config.get_property('geo_dir')
 data_dir_mnps       = config.get_property('data_dir_col')
 results_dir         = config.get_property('results_dir')
-agglomeration_df    = pd.read_csv(os.path.join(data_dir_mnps, 'administrative_division_col_2018.csv')).set_index('poly_id')
 agglomerated_folder = os.path.join(data_dir, 'data_stages', 'colombia', 'agglomerated', 'geometry' )
 
 data =  pd.read_csv(os.path.join(agglomerated_folder, 'cases.csv'), parse_dates=['date_time'], dayfirst=True).set_index('poly_id').loc[11001].set_index('date_time')
@@ -26,7 +25,7 @@ data  = prepare_cases(data, col='num_diseased', cutoff=0) # .rename({'smoothed_n
 data = data.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_diseased':'death'})[['confirmed', 'death']]
 
 
-data = data.iloc[:-11]
+data = data.iloc[:-14]
 
 model = SEIRD(
     confirmed = data['confirmed'].cumsum(),
