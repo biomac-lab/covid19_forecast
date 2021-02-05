@@ -395,9 +395,11 @@ class Model():
         pi_max = 10
         handles = []
         for interval in intervals:
+
             low=(100.-interval)/2
             high=100.-low
             pred_intervals = {names[f]: onp.percentile(onp.array(v), (low, high), axis=0) for f, v in fields.items()}
+
             for i, pi in enumerate(pred_intervals.values()):
                 h = ax.fill_between(t, pi[0,:], pi[1,:], alpha=0.1, color=colors[i], label=interval)
                 handles.append(h)

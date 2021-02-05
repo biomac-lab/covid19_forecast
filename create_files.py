@@ -8,8 +8,6 @@ import numpy as np
 import datetime
 import os
 
-
-
 def load_samples(filename):
 
     x = np.load(filename, allow_pickle=True)
@@ -27,8 +25,6 @@ data_dir_mnps       = config.get_property('data_dir_col')
 results_dir         = config.get_property('results_dir')
 
 agglomerated_folder = os.path.join(data_dir, 'data_stages', 'colombia', 'agglomerated', 'geometry' )
-
-
 data =  pd.read_csv(os.path.join(agglomerated_folder, 'cases.csv'), parse_dates=['date_time'], dayfirst=True).set_index('poly_id').loc[11001].set_index('date_time')
 data = data.resample('D').sum().fillna(0)[['num_cases','num_diseased']]
 data  = prepare_cases(data, col='num_cases', cutoff=0)    # .rename({'smoothed_num_cases':'num_cases'})
@@ -46,8 +42,6 @@ data = data.iloc[:-14]
 T_future = 27
 path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', 'smoohted_'+pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
 
-x = np.load(os.path.join(path_to_save,'samples.npz'), allow_pickle=True)
-
 mcmc_samples, post_pred_samples, forecast_samples = load_samples(os.path.join(path_to_save,'samples.npz'))
 
 
@@ -57,7 +51,10 @@ model = SEIRD(
     death     = data['death'].cumsum(),
     T         = len(data),
     N         = 8181047,
+    samples=mcmc_samples
     )
+
+model.dynamics(params=post_pred_samples, T         = len(data), x0=mcmc_samples["x0"])
 
 forecast_samples['mean_dz0'] = forecast_samples["dz0"]
 forecast_samples['mean_dy0'] = forecast_samples["dy0"]
@@ -99,9 +96,6 @@ df_cases  = create_df_response(cases_fitted, time=len(data), date_init ='2020-03
 
 df_deaths.to_csv(os.path.join(path_to_save, 'deaths_df.csv'))
 df_cases.to_csv(os.path.join(path_to_save, 'cases_df.csv'))
-
-
-
 
 
 ## Compute growth rate over time

@@ -46,8 +46,13 @@ T_future = 27
 path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', 'smoohted_'+pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
 
 
-df_deaths = pd.read_csv(os.path.join(path_to_save, 'deaths_df.csv')).set_index('date')
-df_cases  = pd.read_csv(os.path.join(path_to_save, 'cases_df.csv')).set_index('date')
+df_deaths = pd.read_csv(os.path.join(path_to_save, 'deaths_df.csv'))
+df_deaths['date'] = pd.to_datetime(df_deaths['date'])
+df_deaths = df_deaths.set_index('date')
+
+df_cases  = pd.read_csv(os.path.join(path_to_save, 'cases_df.csv')) #.set_index('date')
+df_cases['date'] = pd.to_datetime(df_cases['date'])
+df_cases = df_cases.set_index('date')
 
 df_deaths_fit = df_deaths.copy(); df_deaths_fit      = df_deaths[df_deaths.type=='estimate']
 df_deaths_forecast = df_deaths.copy(); df_deaths_forecast = df_deaths[df_deaths.type=='forecast']
@@ -62,7 +67,7 @@ ax.plot(df_deaths_fit.index.values, df_deaths_fit["median"], color='black', alph
 ax.scatter(df_deaths_fit.index.values, data.smoothed_death, facecolor='black', alpha=0.6, edgecolor='black', s=10)
 (y1_l, y2_l) = ax.get_ylim()
 
-ax.fill_between(df_deaths_forecast.index.values, df_deaths_forecast.low_75, df_deaths_forecast.high_75, color='green', alpha=0.6, label='4 week forecast')
+ax.fill_between(df_deaths_forecast.index.values, df_deaths_forecast.low_90, df_deaths_forecast.high_90, color='green', alpha=0.6, label='4 week forecast')
 ax.plot(df_deaths_forecast.index.values, df_deaths_forecast["median"], color='green', alpha=0.4, label='Forecast - Median')
 ax.scatter(df_deaths_forecast.index.values, df_deaths_forecast["median"], edgecolor='k', facecolor='white', s=10)#, label='Deaths')
 
@@ -88,8 +93,6 @@ plt.show()
 
 ax.legend()
 fig.savefig(os.path.join(path_to_save, 'death_aggregated_forecast_mcmc.png'), dpi=300, bbox_inches='tight', transparent=False)
-
-
 plt.close()
 
 
@@ -101,7 +104,7 @@ ax.plot(df_cases_fit.index.values, df_cases_fit["median"], color='black', alpha=
 ax.scatter(df_cases_fit.index.values, data.smoothed_confirmed, facecolor='black', alpha=0.6, edgecolor='black', s=10)
 (y1_l, y2_l) = ax.get_ylim()
 
-ax.fill_between(df_cases_forecast.index.values, df_cases_forecast.low_75, df_cases_forecast.high_75, color='darksalmon', alpha=0.6, label='4 week forecast')
+ax.fill_between(df_cases_forecast.index.values, df_cases_forecast.low_90, df_cases_forecast.high_90, color='darksalmon', alpha=0.6, label='4 week forecast')
 ax.plot(df_cases_forecast.index.values, df_cases_forecast["median"], color='darksalmon', alpha=0.4, label='Forecast - Median')
 ax.scatter(df_cases_forecast.index.values, df_cases_forecast["median"], edgecolor='k', facecolor='white', s=10)#, label='Deaths')
 
