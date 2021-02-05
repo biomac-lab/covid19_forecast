@@ -64,9 +64,9 @@ beta_df = create_df_response(beta, beta.shape[-1], date_init ='2020-03-06',  for
 
 
 fig, ax = plt.subplots(1, 1, figsize=(15.5, 7))
-ax.plot(beta_df.index.values, beta_df["median"], color='red', alpha=0.4, label='Median - Nowcast')
-ax.fill_between(beta_df.index.values, beta_df["low_975"], beta_df["high_975"], color='red', alpha=0.4, label='95 CI - Nowcast')
-ax.fill_between(beta_df.index.values, beta_df["low_75"], beta_df["high_75"], color='red', alpha=0.4, label='95 CI - Nowcast')
+ax.plot(beta_df.index.values, beta_df["median"], color='darkred', alpha=0.4, label='Median - Nowcast')
+ax.fill_between(beta_df.index.values, beta_df["low_975"], beta_df["high_975"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
+ax.fill_between(beta_df.index.values, beta_df["low_75"], beta_df["high_75"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
 
 (y1_l, y2_l) = ax.get_ylim()
 
