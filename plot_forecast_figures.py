@@ -41,7 +41,6 @@ data = prepare_cases(data, col='death')
 data = data.iloc[:-14]
 
 
-
 T_future = 27
 path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', 'smoohted_'+pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
 
