@@ -88,10 +88,9 @@ ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
 ax.set_ylabel('Deaths', size=15)
 
 ax.set_ylim((y1_l, 200) )
-plt.show()
-
 ax.legend()
 fig.savefig(os.path.join(path_to_save, 'death_aggregated_forecast_mcmc.png'), dpi=300, bbox_inches='tight', transparent=False)
+fig.savefig(os.path.join('figures', 'mcmc', 'death_aggregated_forecast_mcmc.png'), dpi=300, bbox_inches='tight', transparent=False)
 plt.close()
 
 
@@ -126,5 +125,6 @@ ax.legend()
 ax.set_ylim((y1_l, 9000) )
 
 fig.savefig(os.path.join(path_to_save, 'cases_aggregated_forecast_mcmc.png'), dpi=300, bbox_inches='tight', transparent=False)
+fig.savefig(os.path.join('figures', 'mcmc', 'cases_aggregated_forecast_mcmc.png'), dpi=300, bbox_inches='tight', transparent=False)
 
-plt.show()
+plt.close()
