@@ -10,7 +10,7 @@ We present forecasts in 4 week-format daily cases and deaths horizon.
 ![Cases Forecast](/figures/mcmc/cases_aggregated_forecast_mcmc.png "Cases Forecast")
 
 
-![Deaths Forecast](/figures/mcmc/deaths_aggregated_forecast_mcmc.png "Deaths Forecasts")
+![Deaths Forecast](/figures/mcmc/death_aggregated_forecast_mcmc.png "Deaths Forecasts")
 
 ## Parameter Estimates
 1. Time variable contact rate $\beta (t)$
