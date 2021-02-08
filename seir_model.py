@@ -688,14 +688,18 @@ class SEIRD(SEIRDBase):
         '''
 
         # Sample initial number of infected individuals
-        I0 = numpyro.sample("I0", dist.Uniform(0, 0.02*N))
-        E0 = numpyro.sample("E0", dist.Uniform(0, 0.02*N))
-        H0 = numpyro.sample("H0", dist.Uniform(0, 0.02*N))
-        D0 = numpyro.sample("D0", dist.Uniform(0, 0.02*N))
+        #I0 = numpyro.sample("I0", dist.Uniform(0, 0.02*N))
+        #E0 = numpyro.sample("E0", dist.Uniform(0, 0.02*N))
+        #H0 = numpyro.sample("H0", dist.Uniform(0, 0.02*N))
+        #D0 = numpyro.sample("D0", dist.Uniform(0, 0.02*N))
+
+        I0 = numpyro.sample("I0", dist.Uniform(0, 300))
+        E0 = numpyro.sample("E0", dist.Uniform(0, 300*0.1))
+        H0 = numpyro.sample("H0", dist.Uniform(0, 300*0.1))
+        D0 = numpyro.sample("D0", dist.Uniform(0, 300*0.1))
 
 
         # Sample dispersion parameters around specified values
-
         death_dispersion = numpyro.sample("death_dispersion",
                                            dist.TruncatedNormal(low=0.1,
                                                                 loc=death_dispersion,

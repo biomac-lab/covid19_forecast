@@ -40,7 +40,7 @@ data = data.iloc[:-14]
 
 
 T_future = 27
-path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', 'smoohted_'+pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
+path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
 
 mcmc_samples, post_pred_samples, forecast_samples = load_samples(os.path.join(path_to_save,'samples.npz'))
 
@@ -54,7 +54,7 @@ model = SEIRD(
     samples=mcmc_samples
     )
 
-model.dynamics(params=post_pred_samples, T         = len(data), x0=mcmc_samples["x0"])
+#model.dynamics(params=post_pred_samples, T         = len(data), x0=mcmc_samples["x0"])
 
 forecast_samples['mean_dz0'] = forecast_samples["dz0"]
 forecast_samples['mean_dy0'] = forecast_samples["dy0"]

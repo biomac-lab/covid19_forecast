@@ -42,7 +42,7 @@ data = data.iloc[:-14]
 
 
 T_future = 27
-path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', 'smoohted_'+pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
+path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
 
 
 df_deaths = pd.read_csv(os.path.join(path_to_save, 'deaths_df.csv'))

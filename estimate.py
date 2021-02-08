@@ -1,4 +1,3 @@
-
 from functions.adjust_cases_functions import prepare_cases
 from seir_model import SEIRD
 
@@ -36,7 +35,7 @@ model = SEIRD(
 
 
 T_future = 27
-path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', 'smoohted_'+pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
+path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
 
 if not os.path.exists(path_to_save):
     os.makedirs(path_to_save)
