@@ -106,7 +106,6 @@ ax.fill_between(df_cases_forecast.index.values, df_cases_forecast.low_90, df_cas
 ax.plot(df_cases_forecast.index.values, df_cases_forecast["median"], color='darksalmon', alpha=0.4, label='Forecast - Median')
 ax.scatter(df_cases_forecast.index.values, df_cases_forecast["median"], edgecolor='k', facecolor='white', s=10)#, label='Deaths')
 
-
 ax.xaxis.set_major_locator(mdates.MonthLocator())
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
 ax.xaxis.set_minor_locator(mdates.DayLocator())
