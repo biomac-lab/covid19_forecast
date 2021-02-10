@@ -31,7 +31,7 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
     axes[0].fill_between(df_estimate.index.values, df_estimate[col_down], df_estimate[col_up], color='gray', alpha=0.4, label='95 CI - Nowcast')
     axes[0].plot(df_estimate.index.values, df_estimate[col_point], color='black', alpha=0.4, label='Median - Nowcast')
 
-    axes[0].scatter(df_data_fitted.index.values, df_data_fitted[col_data], facecolor='black', alpha=0.6, edgecolor='black', s=10)
+    axes[0].scatter(df_data_fitted.index.values, df_data_fitted[col_data], facecolor='black', alpha=0.6, edgecolor='black', s=30)
     (y1_l, y2_l) = axes[0].get_ylim()
 
     axes[0].fill_between(df_forecast.index.values, df_forecast[col_down], df_forecast[col_up], color=color, alpha=0.6, label='4 week forecast')
@@ -43,8 +43,8 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
     axes[1].plot(df_estimate.iloc[-10:].index.values, df_estimate.iloc[-10:][col_point], color='black', alpha=0.4)
     axes[1].fill_between(df_forecast.index.values, df_forecast[col_down], df_forecast[col_up], color=color, alpha=0.6)
     axes[1].plot(df_forecast.index.values, df_forecast[col_point], color='black', alpha=0.4)
-    axes[1].scatter(df_estimate.iloc[-10:].index.values, df_data_fitted.iloc[-10:][col_data], facecolor='black', alpha=0.6, edgecolor='black', s=20)
-    axes[1].scatter(df_data_preliminary.index.values, df_data_preliminary[col_data], edgecolor='k', facecolor='red', s=20, label='Preliminary data')
+    axes[1].scatter(df_estimate.iloc[-10:].index.values, df_data_fitted.iloc[-10:][col_data], facecolor='black', alpha=0.6, edgecolor='black', s=50)
+    axes[1].scatter(df_data_preliminary.index.values, df_data_preliminary[col_data], edgecolor='k', facecolor='red', s=50, label='Preliminary data')
 
 
     for ax in axes:
@@ -71,7 +71,8 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
 
     axes[1].xaxis.set_major_locator(mdates.WeekdayLocator())
     axes[1].xaxis.set_major_locator(mdates.MonthLocator())
-    axes[1].tick_params(which='both', axis='x', labelrotation=90)
+    axes[1].tick_params(which='both', axis='x', labelrotation=90, labelsize=15)
+
     axes[1].grid(which='both', axis='x', c='k', alpha=.1, zorder=-2)
     axes[0].grid(which='major', axis='x', c='k', alpha=.1, zorder=-2)
     plt.tight_layout()
