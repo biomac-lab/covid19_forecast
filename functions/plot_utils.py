@@ -10,7 +10,7 @@ from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 from mpl_toolkits.axes_grid.inset_locator import inset_axes
 
 import os
-def plot_fit(df_fit, df_data, y_label='Deaths', color='blue', col_data='smoothed_death', col_up='high_975', col_down='low_975', col_point='median' ,  forecast=True, path_to_save=None):
+def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', col_data='smoothed_death', col_up='high_975', col_down='low_975', col_point='median' ,  forecast=True, path_to_save=None):
     """ df_fit with columns:
             'mean', 'median', 'std', 'low_975', 'high_975', 'low_90', 'high_90', 'low_75', 'high_75', 'type'
             type in ['estimate', 'forecast']
@@ -28,7 +28,7 @@ def plot_fit(df_fit, df_data, y_label='Deaths', color='blue', col_data='smoothed
     df_data_preliminary = df_data.copy(); df_data_preliminary = df_data_preliminary[df_data_preliminary.type=='preliminary']
 
     fig, axes = plt.subplots(1, 2, figsize=(20, 7), sharey=True)
-    axes[0].fill_between(df_estimate.index.values, df_estimate[col_down], df_estimate[col_down], color='gray', alpha=0.4, label='95 CI - Nowcast')
+    axes[0].fill_between(df_estimate.index.values, df_estimate[col_down], df_estimate[col_up], color='gray', alpha=0.4, label='95 CI - Nowcast')
     axes[0].plot(df_estimate.index.values, df_estimate[col_point], color='black', alpha=0.4, label='Median - Nowcast')
 
     axes[0].scatter(df_data_fitted.index.values, df_data_fitted[col_data], facecolor='black', alpha=0.6, edgecolor='black', s=10)
@@ -36,7 +36,7 @@ def plot_fit(df_fit, df_data, y_label='Deaths', color='blue', col_data='smoothed
 
     axes[0].fill_between(df_forecast.index.values, df_forecast[col_down], df_forecast[col_up], color=color, alpha=0.6, label='4 week forecast')
     axes[0].plot(df_forecast.index.values, df_forecast[col_point], color=color, alpha=0.4, label='Forecast - Median')
-    axes[0].scatter(df_forecast.index.values, df_forecast[col_point], edgecolor='k', facecolor='white', s=10)#, label='Deaths')
+    axes[0].scatter(df_forecast.index.values, df_forecast[col_point], edgecolor='k', facecolor='white', s=10)
     axes[0].tick_params(axis='both', labelsize=15)
 
     axes[1].fill_between(df_estimate.iloc[-10:].index.values, df_estimate.iloc[-10:][col_up], df_estimate.iloc[-10:][col_down], color='gray', alpha=0.4)
@@ -61,7 +61,7 @@ def plot_fit(df_fit, df_data, y_label='Deaths', color='blue', col_data='smoothed
         ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
         #ax.axvline(x = 37, linestyle='--',  label = '{}'.format(dates[-1].strftime('%b-%d')))
         ax.set_ylabel(y_label, size=15)
-        ax.set_ylim( (y1_l, 200) )
+        ax.set_ylim( (y1_l, y_lim_up) )
         ax.legend(loc='upper left')
 
     axes[1].xaxis.set_major_locator(mdates.MonthLocator())

@@ -7,10 +7,10 @@ All the mathematical models we use infers past SARS-CoV-2 transmission rates (di
 We present forecasts in 4 week-format daily cases and deaths horizon.
 ## Forecast
 
-![Cases Forecast](/figures/mcmc/cases_aggregated_forecast_mcmc.png "Cases Forecast")
+![Cases Forecast](/figures/mcmc/cases.png "Cases Forecast")
 
 
-![Deaths Forecast](/figures/mcmc/death_aggregated_forecast_mcmc.png "Deaths Forecasts")
+![Deaths Forecast](/figures/mcmc/deaths.png "Deaths Forecasts")
 
 ## Parameter Estimates
 1. Time variable contact rate $\beta (t)$
