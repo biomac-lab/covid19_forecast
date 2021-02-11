@@ -18,7 +18,6 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
         df_data with columns:
                     'confirmed', 'death', 'smoothed_confirmed', 'smoothed_death', 'type'
                     type in ['fitted', 'preliminary']
-
     """
 
     df_estimate = df_fit.copy(); df_estimate = df_estimate[df_estimate.type=='estimate']
