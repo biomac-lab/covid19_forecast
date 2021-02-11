@@ -79,4 +79,3 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
     if path_to_save:
         fig.savefig(path_to_save, dpi=300, bbox_inches='tight', transparent=False)
     plt.close()
-
