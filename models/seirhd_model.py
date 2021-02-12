@@ -365,7 +365,7 @@ class SEIRDBase(Model):
 class SEIRDModel(SEIRModel):
 
     @classmethod
-    def dx_dt(cls, x, t, beta, sigma, gamma, death_prob, death_rate):
+    def dx_dt(cls, x, t, beta, sigma, gamma, hosp_prob, death_prob, death_rate):
         """
         SEIRD equations
         """
@@ -374,17 +374,18 @@ class SEIRDModel(SEIRModel):
 
         dS_dt = - beta * S * I / N
         dE_dt = beta * S * I / N - sigma * E
-        dI_dt = sigma * E - gamma * (1 - death_prob) * I - gamma * death_prob * I
-        dH_dt = death_prob * gamma * I - death_rate * H
-        dD_dt = death_rate * H
-        dR_dt = gamma * (1 - death_prob) * I
-        dC_dt = sigma * E  # incidence
+        dI_dt = sigma * E - gamma * (1 - hosp_prob) * I - gamma * hosp_prob * I
+        dH_dt = hosp_prob * gamma * I - death_rate * death_prob * H - gamma * (1-death_prob) * H
+        dR_dt = gamma * (1-death_prob) * H + gamma * hosp_prob * I
+        dU_dt = hosp_prob * gamma * I       # Cum hosp
+        dD_dt = death_rate * death_prob * H # Cum deaths
+        dC_dt = sigma * E                   # Cum incidence
 
-        return np.stack([dS_dt, dE_dt, dI_dt, dR_dt, dH_dt, dD_dt, dC_dt])
+        return np.stack([dS_dt, dE_dt, dI_dt, dR_dt, dH_dt, dU_dt, dD_dt, dC_dt])
 
     @classmethod
-    def seed(cls, N=1e6, I=100., E=0., R=0.0, H=0.0, D=0.0):
-        return np.stack([N-E-I-R-H-D, E, I, R, H, D, I])
+    def seed(cls, N=1e6, I=100., E=0., R=0.0, U=0.0, H=0.0, D=0.0):
+        return np.stack([N-E-I-R-H-D, E, I, R, H, U, D, I])
 
 
 def frozen_random_walk(name, num_steps=100, num_frozen=10):
@@ -439,6 +440,7 @@ class SEIRD(SEIRDBase):
                  det_prob_conc = 50.,
                  confirmed_dispersion=0.3,
                  death_dispersion=0.3,
+                 hosp_dispersion=0.3,
                  rw_scale = 2e-1,
                  det_noise_scale=0.15,
                  forecast_rw_scale = 0.,
@@ -448,7 +450,6 @@ class SEIRD(SEIRDBase):
                  confirmed=None,
                  death=None,
                  hospitalized=None):
-
         '''
         Stochastic SEIR model. Draws random parameters and runs dynamics.
         '''
@@ -469,6 +470,11 @@ class SEIRD(SEIRDBase):
         death_dispersion = numpyro.sample("death_dispersion",
                                            dist.TruncatedNormal(low=0.1,
                                                                 loc=death_dispersion,
+                                                                scale=0.15))
+
+        hosp_dispersion = numpyro.sample("hospitalized_dispersion",
+                                           dist.TruncatedNormal(low=0.1,
+                                                                loc=hosp_dispersion,
                                                                 scale=0.15))
 
 
