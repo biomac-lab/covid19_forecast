@@ -70,7 +70,6 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
     axes[1].xaxis.set_major_locator(mdates.WeekdayLocator())
     axes[1].xaxis.set_major_locator(mdates.MonthLocator())
     axes[1].tick_params(which='both', axis='x', labelrotation=90, labelsize=15)
-
     axes[1].grid(which='both', axis='x', c='k', alpha=.1, zorder=-2)
     axes[0].grid(which='major', axis='x', c='k', alpha=.1, zorder=-2)
     plt.tight_layout()
