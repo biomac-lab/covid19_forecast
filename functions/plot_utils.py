@@ -10,7 +10,7 @@ from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 from mpl_toolkits.axes_grid.inset_locator import inset_axes
 
 import os
-def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', col_data='smoothed_death', col_up='high_975', col_down='low_975', col_point='median' ,  forecast=True, path_to_save=None):
+def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', col_data='smoothed_death', col_up='high_975', col_down='low_975', col_point='median', ax=None,   forecast=True, path_to_save=None):
     """ df_fit with columns:
             'mean', 'median', 'std', 'low_975', 'high_975', 'low_90', 'high_90', 'low_75', 'high_75', 'type'
             type in ['estimate', 'forecast']
