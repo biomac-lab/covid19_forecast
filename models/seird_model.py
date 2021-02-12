@@ -11,14 +11,6 @@ import numpyro
 import matplotlib.pyplot as plt
 import pandas as pd
 
-def getter(f):
-    '''
-    Utility to define access method for time varying fields
-    '''
-
-    def get(self, samples, forecast=False):
-        return samples[f + '_future'] if forecast else self.combine_samples(samples, f)
-    return get
 
 class CompartmentModel(object):
     '''

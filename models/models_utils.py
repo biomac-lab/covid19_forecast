@@ -4,6 +4,14 @@ import jax.numpy as np
 import numpy as onp
 import numpyro
 
+def getter(f):
+    '''
+    Utility to define access method for time varying fields
+    '''
+
+    def get(self, samples, forecast=False):
+        return samples[f + '_future'] if forecast else self.combine_samples(samples, f)
+    return get
 
 def nb2(mu=None, k=None):
     conc = 1./k

@@ -5,6 +5,7 @@ __pycache__/
 
 *.csv
 seir_model_original.py
+models/seir_model_original.py
 
 # C extensions
 *.so
