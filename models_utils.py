@@ -17,10 +17,6 @@ def observe_nb2(name, latent, det_prob, dispersion, obs=None):
         mask = np.isfinite(obs) & (obs >= 0.0)
         obs = np.where(mask, obs, 0.0)
 
-    # --> gives error with newer jax/numpyro (on swarm2, with numpyro.enable_x64())
-    #if onp.any(np.logical_not(mask)):
-    #    warnings.warn('Some observed values are invalid')
-
     det_prob = np.broadcast_to(det_prob, latent.shape)
 
     mean = det_prob * latent
