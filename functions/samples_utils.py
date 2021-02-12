@@ -2,7 +2,18 @@ import pandas as pd
 import datetime
 
 def create_df_response(samples, time, date_init ='2020-03-06',  forecast_horizon=27, use_future=False):
+    """[summary]
 
+    Args:
+        samples ([type]): [description]
+        time ([type]): [description]
+        date_init (str, optional): [description]. Defaults to '2020-03-06'.
+        forecast_horizon (int, optional): [description]. Defaults to 27.
+        use_future (bool, optional): [description]. Defaults to False.
+
+    Returns:
+        [type]: [description]
+    """
     dates_fitted   = pd.date_range(start=pd.to_datetime(date_init), periods=time)
     dates_forecast = pd.date_range(start=dates_fitted[-1]+datetime.timedelta(1), periods=forecast_horizon)
     dates = list(dates_fitted)

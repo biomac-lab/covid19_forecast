@@ -26,8 +26,8 @@ agglomerated_folder = os.path.join(data_dir, 'data_stages', 'colombia', 'agglome
 
 data =  pd.read_csv(os.path.join(agglomerated_folder, 'cases.csv'), parse_dates=['date_time'], dayfirst=True).set_index('poly_id').loc[11001].set_index('date_time')
 data = data.resample('D').sum().fillna(0)[['num_cases','num_diseased']]
-data  = prepare_cases(data, col='num_cases', cutoff=0)    # .rename({'smoothed_num_cases':'num_cases'})
-data  = prepare_cases(data, col='num_diseased', cutoff=0) # .rename({'smoothed_num_cases':'num_cases'})
+data  = prepare_cases(data, col='num_cases', cutoff=0)
+data  = prepare_cases(data, col='num_diseased', cutoff=0)
 
 data = data.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_diseased':'death'})[['confirmed', 'death']]
 
@@ -61,7 +61,6 @@ mcmc_samples, _, _ = load_samples(os.path.join(path_to_save, 'samples.npz'))
 beta = mcmc_samples['beta']
 
 beta_df = create_df_response(beta, beta.shape[-1], date_init ='2020-03-06',  forecast_horizon=27, use_future=False)
-
 
 fig, ax = plt.subplots(1, 1, figsize=(15.5, 7))
 ax.plot(beta_df.index.values, beta_df["median"], color='darkred', alpha=0.4, label='Median - Nowcast')

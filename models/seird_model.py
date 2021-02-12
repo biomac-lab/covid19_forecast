@@ -8,10 +8,9 @@ import numpyro.distributions as dist
 import numpy as onp
 import numpyro
 
-import matplotlib.pyplot as plt
 import pandas as pd
 
-from .models_utils import getter
+from .models_utils import getter, clean_daily_obs, observe_nb2
 
 class CompartmentModel(object):
     '''

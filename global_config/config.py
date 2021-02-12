@@ -13,7 +13,7 @@ try:
     df_config = pd.read_csv(os.path.join(current_location, 'config_file.csv'), index_col = 'name')
 
 except FileNotFoundError:
-    raise ValueError('The configuration file: "config_file.csv", was not found insise the directory: "global_config/". Please add it')
+    raise ValueError('The configuration file: "config_file.csv", was not found inside the directory: "global_config/". Please add it')
 
 
 def get_property(name):

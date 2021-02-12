@@ -4,6 +4,7 @@ import jax.numpy as np
 import numpy as onp
 import numpyro
 
+
 def getter(f):
     '''
     Utility to define access method for time varying fields

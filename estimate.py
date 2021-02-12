@@ -9,6 +9,15 @@ import os
 
 from global_config import config
 
+import sys
+
+
+if len(sys.argv) < 2:
+    raise NotImplementedError()
+else:
+    poly_run  = int(sys.argv[1])
+    name_dir  = str(sys.argv[2])
+    print("**** Running inference and forecast for {}".format(name_dir))
 
 data_dir            = config.get_property('data_dir_covid')
 geo_dir             = config.get_property('geo_dir')
@@ -16,13 +25,14 @@ data_dir_mnps       = config.get_property('data_dir_col')
 results_dir         = config.get_property('results_dir')
 agglomerated_folder = os.path.join(data_dir, 'data_stages', 'colombia', 'agglomerated', 'geometry' )
 
-data =  pd.read_csv(os.path.join(agglomerated_folder, 'cases.csv'), parse_dates=['date_time'], dayfirst=True).set_index('poly_id').loc[11001].set_index('date_time')
+data =  pd.read_csv(os.path.join(agglomerated_folder, 'cases.csv'), parse_dates=['date_time'],
+                    dayfirst=True).set_index('poly_id').loc[poly_run].set_index('date_time')
 data = data.resample('D').sum().fillna(0)[['num_cases','num_diseased']]
 data  = prepare_cases(data, col='num_cases', cutoff=0)    # .rename({'smoothed_num_cases':'num_cases'})
 data  = prepare_cases(data, col='num_diseased', cutoff=0) # .rename({'smoothed_num_cases':'num_cases'})
-
 data = data.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_diseased':'death'})[['confirmed', 'death']]
 
+print("**** **** Last day uploaded {}".format(pd.to_datetime(data.index.values[-1]).strftime('%Y-%b-%d')))
 
 data = data.iloc[:-14]
 
@@ -35,7 +45,8 @@ model = SEIRD(
 
 
 T_future = 27
-path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
+path_to_save = os.path.join(results_dir, 'weekly_forecast' , name_dir, pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
+print("**** **** **** Fitting until {}".format(pd.to_datetime(data.index.values[-1]).strftime('%Y-%b-%d')))
 
 if not os.path.exists(path_to_save):
     os.makedirs(path_to_save)

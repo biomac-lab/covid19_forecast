@@ -58,7 +58,6 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
         ax.spines['bottom'].set_visible(False)
         ax.grid(which='major', axis='y', c='k', alpha=.1, zorder=-2)
         ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.0f}"))
-        #ax.axvline(x = 37, linestyle='--',  label = '{}'.format(dates[-1].strftime('%b-%d')))
         ax.set_ylabel(y_label, size=15)
         ax.set_ylim( (y1_l, y_lim_up) )
         ax.legend(loc='upper left')

@@ -20,27 +20,6 @@ def confirmed_to_onset(confirmed, p_delay, col_name='num_cases', min_onset_date=
     onset.index.name = 'date'
     return pd.DataFrame(onset)
 
-######## this might work but CAREFULL
-def adjust_onset_for_right_censorship(onset, p_delay, col_name='num_cases'):
-    onset_df =  onset[col_name]
-    cumulative_p_delay = p_delay.cumsum()
-
-    # Calculate the additional ones needed so shapes match
-    ones_needed = len(onset) - len(cumulative_p_delay)
-    padding_shape = (0, ones_needed)
-
-    # Add ones and flip back
-    cumulative_p_delay = np.pad(
-        cumulative_p_delay,
-        padding_shape,
-        constant_values=1)
-    cumulative_p_delay = np.flip(cumulative_p_delay)
-
-    # Adjusts observed onset values to expected terminal onset values
-    onset[col_name+'_adjusted'] = onset_df / cumulative_p_delay
-
-    return onset, cumulative_p_delay
-
 # Smooths cases using a rolling window and gaussian sampling
 def prepare_cases(daily_cases, col='num_cases', out_col=None, cutoff=0):
     if not out_col:
