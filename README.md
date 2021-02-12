@@ -2,7 +2,7 @@
 Contributors from the BIOMAC lab at Uniandes (listed alphabetically): Carlos Bravo, Jaime Cascante, Juan Cordovez and Mauricio Santos.
 
 ## Data Availability
-We fork data from the [DataLama](http://datalama.polyglot.site/) lab at URosario. For any other info about data please contact them. 
+We fork incidence data from the [DataLama](http://datalama.polyglot.site/) lab at URosario. For any other info about data please contact them. 
 
 ## Models Card
 All the mathematical models we use infers past SARS-CoV-2 transmission rates (different assumptions and methods on the inference) and can be used to forecast community spread, and mortality.
