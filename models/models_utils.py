@@ -36,3 +36,56 @@ def observe_nb2(name, latent, det_prob, dispersion, obs=None):
         y = numpyro.sample(name, d, obs = obs)
 
     return y
+
+def clean_daily_obs(obs, radius=2):
+    '''Clean daily observations to fix negative elements'''
+
+    # This searches for a small window containing the negative element
+    # whose sum is non-negative, then sets each element in the window
+    # to the same value to preserve the sum. This ensures that cumulative
+    # sums of the daily time series are preserved to the extent possible.
+    # (They only change inside the window, over which the cumulative sum is
+    # linear.)
+
+    orig_obs = obs
+
+    # Subset to valid indices
+    inds = onp.isfinite(obs)
+    obs = obs[inds]
+
+    obs = onp.array(obs)
+    bad = onp.argwhere(obs < 0)
+
+    for ind in bad:
+
+        ind = ind[0]
+
+        if obs[ind] >= 0:
+            # it's conceivable the problem was fixed when
+            # we cleaned another bad value
+            continue
+
+        left = ind - radius
+        right = ind + radius + 1
+        tot = onp.sum(obs[left:right])
+
+        while tot < 0 and (left >= 0 or right <= len(obs)):
+            left -= 1
+            right += 1
+            tot = onp.sum(obs[left:right])
+
+        if tot < 0:
+            raise ValueError("Couldn't clean data")
+
+        n = len(obs[left:right])
+
+        avg = tot // n
+        rem = int(tot % n)
+
+        obs[left:right] = avg
+        obs[left:(left+rem)] += 1
+
+    assert(onp.nansum(orig_obs) == onp.nansum(obs))
+
+    orig_obs[inds] = obs
+    return orig_obs

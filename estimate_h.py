@@ -1,5 +1,7 @@
 from functions.adjust_cases_functions import prepare_cases
 from models.seird_model import SEIRD
+from models.seirhd_model import SEIRHD
+
 
 import matplotlib.pyplot as plt
 import scipy.io as sio
@@ -14,9 +16,18 @@ data_dir            = config.get_property('data_dir_covid')
 geo_dir             = config.get_property('geo_dir')
 data_dir_mnps       = config.get_property('data_dir_col')
 results_dir         = config.get_property('results_dir')
-agglomerated_folder = os.path.join(data_dir, 'data_stages', 'colombia', 'agglomerated', 'geometry' )
+agglomerated_folder = os.path.join(data_dir, 'data_stages', 'colombia', 'agglomerated', 'geometry')
 
 data =  pd.read_csv(os.path.join(agglomerated_folder, 'cases.csv'), parse_dates=['date_time'], dayfirst=True).set_index('poly_id').loc[11001].set_index('date_time')
+
+fig, axes = plt.subplots(2,1)
+data["num_diseased"].plot(ax=axes[0], color='red', linestyle='--')
+data["num_cases"].plot(ax=axes[1], color='k', linestyle='-')
+ax_tw = axes[1].twinx()
+data["num_infected_in_hospital"].plot(ax=ax_tw, color='blue', linestyle='--')
+
+plt.show()
+
 data = data.resample('D').sum().fillna(0)[['num_cases','num_diseased']]
 data  = prepare_cases(data, col='num_cases', cutoff=0)    # .rename({'smoothed_num_cases':'num_cases'})
 data  = prepare_cases(data, col='num_diseased', cutoff=0) # .rename({'smoothed_num_cases':'num_cases'})
@@ -26,11 +37,12 @@ data = data.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_dis
 
 data = data.iloc[:-14]
 
-model = SEIRD(
-    confirmed = data['confirmed'].cumsum(),
-    death     = data['death'].cumsum(),
-    T         = len(data),
-    N         = 8181047,
+model = SEIRHD(
+    hospitalized     = data['death'].cumsum(),
+    confirmed        = data['confirmed'].cumsum(),
+    death            = data['death'].cumsum(),
+    T                = len(data),
+    N                = 8181047,
     )
 
 

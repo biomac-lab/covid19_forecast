@@ -11,7 +11,7 @@ import numpyro
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from models_utils import getter
+from .models_utils import getter, clean_daily_obs, observe_nb2
 
 class CompartmentModel(object):
     '''
@@ -73,78 +73,6 @@ class CompartmentModel(object):
     def growth_rate(cls, theta):
         raise NotImplementedError()
 
-class SIRModel(CompartmentModel):
-
-    @classmethod
-    def dx_dt(cls, x, t, beta, gamma):
-        """
-        SIR equations
-        """
-        S, I, R, C = x
-        N = S + I + R
-
-        dS_dt = - beta * S * I / N
-        dI_dt = beta * S * I / N - gamma * I
-        dR_dt = gamma * I
-        dC_dt = beta * S * I / N  # Cum Incidence
-
-        return np.stack([dS_dt, dI_dt, dR_dt, dC_dt])
-
-    @classmethod
-    def R0(cls, theta):
-        beta, gamma = theta
-        return beta/gamma
-
-    @classmethod
-    def growth_rate(cls, theta):
-        beta, gamma = theta
-        return beta - gamma
-
-    @classmethod
-    def seed(cls, N=1e6, I=100.):
-        return np.stack([N-I, I, 0.0, I])
-
-class SEIRModel(CompartmentModel):
-
-    @classmethod
-    def dx_dt(cls, x, t, beta, sigma, gamma):
-        """
-        SEIR equations
-        """
-        S, E, I, R, C = x
-        N = S + E + I + R
-
-        dS_dt = - beta * S * I / N
-        dE_dt = beta * S * I / N - sigma * E
-        dI_dt = sigma * E - gamma * I
-        dR_dt = gamma * I
-        dC_dt = sigma * E  # Cum incidence
-
-        return np.stack([dS_dt, dE_dt, dI_dt, dR_dt, dC_dt])
-
-    @classmethod
-    def R0(cls, theta):
-        beta, sigma, gamma = theta
-        return beta / gamma
-
-    @classmethod
-    def growth_rate(cls, theta):
-        '''
-        Initial rate of exponential growth
-
-        Reference: Junling Ma, Estimating epidemic exponential growth rate
-        and basic reproduction number, Infectious Disease Modeling, 2020
-        '''
-        beta, sigma, gamma = theta
-        return (-(sigma + gamma) + np.sqrt((sigma - gamma)**2 + 4 * sigma * beta))/2.
-
-
-    @classmethod
-    def seed(cls, N=1e6, I=100., E=0.):
-        '''
-        Seed infection. Return state vector for I exposed out of N
-        '''
-        return np.stack([N-E-I, E, I, 0.0, I])
 
 class Model():
 
@@ -154,14 +82,18 @@ class Model():
         'R': 'removed',
         'E': 'exposed',
         'H': 'hospitalized',
+        'U': 'cumulative hospitalized',
         'D': 'dead',
         'C': 'cumulative infected',
         'y': 'confirmed',
         'z': 'deaths',
+        'h': 'hospitalizations',
         'dy': 'daily confirmed',
         'dz': 'daily deaths',
+        'dh': 'daily hospitalizations',
         'mean_dy': 'daily confirmed (mean)',
-        'mean_dz': 'daily deaths (mean)'
+        'mean_dz': 'daily deaths (mean)',
+        'mean_dh': 'daily hospitalizations (mean)'
     }
 
     def __init__(self, data=None, mcmc_samples=None, **args):
@@ -177,13 +109,11 @@ class Model():
         '''
         return {}
 
-
     """
     ***************************************
     Inference and sampling routines
     ***************************************
     """
-
     def infer(self, num_warmup=1000, num_samples=1000, num_chains=1, rng_key=PRNGKey(1), **args):
         '''Fit using MCMC'''
 
@@ -247,7 +177,7 @@ class Model():
         sigma = self.mcmc_samples['sigma']
         beta_end = beta[:,-rw_use_last:].mean(axis=1)
 
-        growth_rate = SEIRDModel.growth_rate((beta_end, sigma, gamma))
+        growth_rate = SEIRHDModel.growth_rate((beta_end, sigma, gamma))
         growth_rate = onp.array(growth_rate)
         low = int( (low/100) * len(growth_rate))
         high = int( (high/100) * len(growth_rate))
@@ -299,20 +229,64 @@ class Model():
     #y = getter('y')
     mean_y = getter('mean_y')
     mean_z = getter('mean_z')
+    mean_h = getter('mean_h')
 
     z = mean_z
     y = mean_y
+    h = mean_h
 
     # There are only available in some models but easier to define here
     dz = getter('dz')
     dy = getter('dy')
+    dh = getter('dh')
     mean_dy = getter('mean_dy')
     mean_dz = getter('mean_dz')
+    mean_dh = getter('mean_dh')
+
+class SEIRModel(CompartmentModel):
+
+    @classmethod
+    def dx_dt(cls, x, t, beta, sigma, gamma):
+        """
+        SEIR equations
+        """
+        S, E, I, R, C = x
+        N = S + E + I + R
+
+        dS_dt = - beta * S * I / N
+        dE_dt = beta * S * I / N - sigma * E
+        dI_dt = sigma * E - gamma * I
+        dR_dt = gamma * I
+        dC_dt = sigma * E  # incidence
+
+        return np.stack([dS_dt, dE_dt, dI_dt, dR_dt, dC_dt])
+
+    @classmethod
+    def R0(cls, theta):
+        beta, sigma, gamma = theta
+        return beta / gamma
+
+    @classmethod
+    def growth_rate(cls, theta):
+        '''
+        Initial rate of exponential growth
+
+        Reference: Junling Ma, Estimating epidemic exponential growth rate
+        and basic reproduction number, Infectious Disease Modeling, 2020
+        '''
+        beta, sigma, gamma = theta
+        return (-(sigma + gamma) + np.sqrt((sigma - gamma)**2 + 4 * sigma * beta))/2.
 
 
-class SEIRDBase(Model):
+    @classmethod
+    def seed(cls, N=1e6, I=100., E=0.):
+        '''
+        Seed infection. Return state vector for I exponsed out of N
+        '''
+        return np.stack([N-E-I, E, I, 0.0, I])
+class SEIRHDBase(Model):
 
-    compartments = ['S', 'E', 'I', 'R', 'H', 'D', 'C']
+    compartments = ['S', 'E', 'I', 'R', 'H', 'U', 'D', 'C']
 
     @property
     def obs(self):
@@ -324,9 +298,11 @@ class SEIRDBase(Model):
             return {}
 
         return {
+            'hospitalized': self.data['hospitalized'].values,
             'confirmed': self.data['confirmed'].values,
             'death': self.data['death'].values
            }
+
     def dz_mean(self, samples, **args):
         '''Daily deaths mean'''
         mean_z = self.mean_z(samples, **args)
@@ -342,6 +318,22 @@ class SEIRDBase(Model):
         dz_mean = self.dz_mean(samples, **args)
         dz = dist.Normal(dz_mean, noise_scale * dz_mean).sample(PRNGKey(10))
         return dz
+
+    def dh_mean(self, samples, **args):
+        '''Daily hospitalizations mean'''
+        mean_h = self.mean_h(samples, **args)
+        if args.get('forecast'):
+            first = self.mean_h(samples, forecast=False)[:,-1,None]
+        else:
+            first = np.nan
+
+        return onp.diff(mean_h, axis=1, prepend=first)
+
+    def dh(self, samples, noise_scale=0.4, **args):
+        '''Daily hospitalizations with observation noise'''
+        dh_mean = self.dh_mean(samples, **args)
+        dh = dist.Normal(dh_mean, noise_scale * dh_mean).sample(PRNGKey(10))
+        return dh
 
     def dy_mean(self, samples, **args):
         '''Daily confirmed cases mean'''
@@ -362,14 +354,14 @@ class SEIRDBase(Model):
 
 
 
-class SEIRDModel(SEIRModel):
+class SEIRHDModel(SEIRModel):
 
     @classmethod
     def dx_dt(cls, x, t, beta, sigma, gamma, hosp_prob, death_prob, death_rate):
         """
         SEIRD equations
         """
-        S, E, I, R, H, D, C = x
+        S, E, I, R, H, U, D, C = x
         N = S + E + I + R + H + D
 
         dS_dt = - beta * S * I / N
@@ -423,7 +415,7 @@ def LogisticRandomWalk(loc=1., scale=1e-2, drift=0., num_steps=100):
     )
 
 
-class SEIRD(SEIRDBase):
+class SEIRHD(SEIRHDBase):
 
     def __call__(self,
                  T = 50,
@@ -455,11 +447,6 @@ class SEIRD(SEIRDBase):
         '''
 
         # Sample initial number of infected individuals
-        #I0 = numpyro.sample("I0", dist.Uniform(0, 0.02*N))
-        #E0 = numpyro.sample("E0", dist.Uniform(0, 0.02*N))
-        #H0 = numpyro.sample("H0", dist.Uniform(0, 0.02*N))
-        #D0 = numpyro.sample("D0", dist.Uniform(0, 0.02*N))
-
         I0 = numpyro.sample("I0", dist.Uniform(0, 300))
         E0 = numpyro.sample("E0", dist.Uniform(0, 300*0.1))
         H0 = numpyro.sample("H0", dist.Uniform(0, 300*0.1))
@@ -505,6 +492,9 @@ class SEIRD(SEIRDBase):
 
         death_prob = numpyro.sample("death_prob",
                                     dist.Beta(0.01 * 100, (1-0.01) * 100))
+
+        hosp_prob = numpyro.sample("hosp_prob",
+                                    dist.Beta(0.01 * 100, (1-0.01) * 100))
                                     #dist.Beta(0.02 * 1000, (1-0.02) * 1000))
 
         death_rate = numpyro.sample("death_rate",
@@ -517,7 +507,7 @@ class SEIRD(SEIRDBase):
             drift = 0.
 
 
-        x0 = SEIRDModel.seed(N=N, I=I0, E=E0, H=H0, D=D0)
+        x0 = SEIRHDModel.seed(N=N, I=I0, E=E0, H=H0, U=H0, D=D0)
         numpyro.deterministic("x0", x0)
 
         # Split observations into first and rest
@@ -531,7 +521,13 @@ class SEIRD(SEIRDBase):
             death0, death = (None, None)
         else:
             death0 = death[0]
-            death = clean_daily_obs(onp.diff(death))
+            death  = clean_daily_obs(onp.diff(death))
+
+        if hospitalized is None:
+            hospitalized0, hospitalized = (None, None)
+        else:
+            hospitalized0 = hospitalized[0]
+            hospitalized  = clean_daily_obs(onp.diff(hospitalized))
 
 
         # First observation
@@ -543,6 +539,11 @@ class SEIRD(SEIRDBase):
             z0 = observe_nb2("dz0", x0[5], det_prob_d, death_dispersion, obs=death0)
             #z0 = observe("dz0", x0[5], det_prob_d, det_noise_scale, obs=death0)
 
+        with numpyro.handlers.scale(scale=2.0):
+            h0 = observe_nb2("dh0", x0[4], det_prob_d, hosp_dispersion, obs=hospitalized0)
+            #z0 = observe("dz0", x0[5], det_prob_d, det_noise_scale, obs=death0)
+
+
         params = (beta0,
                   sigma,
                   gamma,
@@ -551,20 +552,24 @@ class SEIRD(SEIRDBase):
                   det_prob0,
                   confirmed_dispersion,
                   death_dispersion,
+                  hosp_dispersion,
+                  hosp_prob,
                   death_prob,
                   death_rate,
                   det_prob_d)
 
-        beta, det_prob, x, y, z = self.dynamics(T,
+        beta, det_prob, x, y, z, h = self.dynamics(T,
                                                 params,
                                                 x0,
                                                 num_frozen = num_frozen,
                                                 confirmed = confirmed,
-                                                death = death)
+                                                death = death,
+                                                hospitalized = hospitalized)
 
         x = np.vstack((x0, x))
         y = np.append(y0, y)
         z = np.append(z0, z)
+        h = np.append(h0, h)
 
         if T_future > 0:
 
@@ -576,11 +581,13 @@ class SEIRD(SEIRDBase):
                       det_prob[-rw_use_last:].mean(),
                       confirmed_dispersion,
                       death_dispersion,
+                      hosp_dispersion,
+                      hosp_prob,
                       death_prob,
                       death_rate,
                       det_prob_d)
 
-            beta_f, det_rate_rw_f, x_f, y_f, z_f = self.dynamics(T_future+1,
+            beta_f, det_rate_rw_f, x_f, y_f, z_f, h_f = self.dynamics(T_future+1,
                                                                  params,
                                                                  x[-1,:],
                                                                  suffix="_future")
@@ -588,10 +595,11 @@ class SEIRD(SEIRDBase):
             x = np.vstack((x, x_f))
             y = np.append(y, y_f)
             z = np.append(z, z_f)
+            h = np.append(h, h_f)
 
-        return beta, x, y, z, det_prob, death_prob
+        return beta, x, y, z, h, det_prob, death_prob
 
-    def dynamics(self, T, params, x0, num_frozen=0, confirmed=None, death=None, suffix=""):
+    def dynamics(self, T, params, x0, num_frozen=0, confirmed=None, death=None, hospitalized=None, suffix=""):
         '''Run SEIRD dynamics for T time steps'''
         beta0, \
         sigma, \
@@ -601,6 +609,8 @@ class SEIRD(SEIRDBase):
         det_prob0, \
         confirmed_dispersion, \
         death_dispersion, \
+        hosp_dispersion, \
+        hosp_prob, \
         death_prob, \
         death_rate, \
         det_prob_d = params
@@ -618,12 +628,9 @@ class SEIRD(SEIRDBase):
                                                      num_steps=T-1))
 
         # Run ODE
-        x = SEIRDModel.run(T, x0, (beta, sigma, gamma, death_prob, death_rate))
-
+        x = SEIRHDModel.run(T, x0, (beta, sigma, gamma, hosp_prob, death_prob, death_rate))
         numpyro.deterministic("x" + suffix, x[1:])
-
         x_diff = np.diff(x, axis=0)
-
 
         # Noisy observations
         with numpyro.handlers.scale(scale=0.5):
@@ -634,12 +641,17 @@ class SEIRD(SEIRDBase):
             z = observe_nb2("dz" + suffix, x_diff[0:,5], det_prob_d, death_dispersion, obs = death)
             #z = observe("dz" + suffix, x_diff[:,5], det_prob_d, death_dispersion, obs = death)
 
+        with numpyro.handlers.scale(scale=2.0):
+            h = observe_nb2("dh" + suffix, x_diff[0:,4], det_prob_d, hosp_dispersion, obs = hospitalized)
+            #h = observe_nb("dh" + suffix, x_diff[0:,4], det_prob_d, hosp_dispersion, obs = death)
 
-        return beta, det_prob, x, y, z
+
+        return beta, det_prob, x, y, z, h
 
 
     dy = getter('dy')
     dz = getter('dz')
+    dh = getter('dh')
 
     def y0(self, **args):
         return self.z0(**args)
@@ -671,3 +683,18 @@ class SEIRD(SEIRDBase):
             z0 = self.z(samples, forecast=False)[:,-1]
 
         return z0[:,None] + onp.cumsum(dz, axis=1)
+
+    def h0(self, **args):
+        return self.h0(**args)
+
+
+    def h(self, samples, **args):
+        '''Get cumulative hospitalizations from incident ones'''
+
+        dh = self.dh(samples, **args)
+
+        h0 = np.zeros(dh.shape[0])
+        if args.get('forecast'):
+            h0 = self.z(samples, forecast=False)[:,-1]
+
+        return h0[:,None] + onp.cumsum(dh, axis=1)

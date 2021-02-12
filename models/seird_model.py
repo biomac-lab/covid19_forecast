@@ -11,7 +11,7 @@ import numpyro
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from models_utils import getter
+from .models_utils import getter
 
 class CompartmentModel(object):
     '''
