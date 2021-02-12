@@ -1,6 +1,6 @@
 from functions.adjust_cases_functions import prepare_cases
-from models.seird_model import SEIRD
 from models.seirhd_model import SEIRHD
+from models.seird_model import SEIRD
 
 
 import matplotlib.pyplot as plt
@@ -13,30 +13,50 @@ from global_config import config
 
 
 data_dir            = config.get_property('data_dir_covid')
-geo_dir             = config.get_property('geo_dir')
 data_dir_mnps       = config.get_property('data_dir_col')
 results_dir         = config.get_property('results_dir')
+hosp_url            = config.get_property('hosp_url')
+geo_dir             = config.get_property('geo_dir')
+
 agglomerated_folder = os.path.join(data_dir, 'data_stages', 'colombia', 'agglomerated', 'geometry')
 
-data =  pd.read_csv(os.path.join(agglomerated_folder, 'cases.csv'), parse_dates=['date_time'], dayfirst=True).set_index('poly_id').loc[11001].set_index('date_time')
+data = pd.read_csv(os.path.join(agglomerated_folder, 'cases.csv'), parse_dates=['date_time'], dayfirst=True).set_index('poly_id').loc[11001]#.set_index('date_time')
+hosp = pd.read_csv(hosp_url, encoding='ISO-8859-1', sep=';', dtype=str, skiprows=4, skipfooter=2, engine='python'
+                    ).rename(columns={'Fecha': 'date_time', 'Camas ocupadas COVID 19': 'hospitalized', 'Camas asignadas COVID 19':'total_beds'})
+hosp['hospitalized'] = hosp["hospitalized"].apply(lambda x: int(x.replace('.', '')))
+hosp['total_beds'] = hosp["total_beds"].apply(lambda x: int(x.replace('.', '')))
+hosp["date_time"] =  pd.to_datetime(hosp["date_time"], format='%d/%m/%Y')
 
+
+data_all = pd.merge(data, hosp, how='outer').set_index('date_time')
+data_all_raw = data_all.copy()
+
+# hospitalized cases only available since mid. may...
+data_all = data_all.dropna()
 fig, axes = plt.subplots(2,1)
-data["num_diseased"].plot(ax=axes[0], color='red', linestyle='--')
-data["num_cases"].plot(ax=axes[1], color='k', linestyle='-')
+data_all["num_diseased"].plot(ax=axes[0], color='red', linestyle='--', label='Deaths')
+data_all["num_cases"].plot(ax=axes[1], color='k', linestyle='-', label='Cases')
 ax_tw = axes[1].twinx()
-data["num_infected_in_hospital"].plot(ax=ax_tw, color='blue', linestyle='--')
+data_all["hospitalized"].plot(ax=axes[1], color='blue', linestyle='--', label='Hosp')
+axes[0].legend()
+axes[1].legend()
+ax_tw.legend()
 plt.show()
 
-data = data.resample('D').sum().fillna(0)[['num_cases','num_diseased']]
-data  = prepare_cases(data, col='num_cases', cutoff=0)
-data  = prepare_cases(data, col='num_diseased', cutoff=0)
-data = data.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_diseased':'death'})[['confirmed', 'death']]
-data = data.iloc[:-14]
+
+
+data_all = data_all.resample('D').sum().fillna(0)[['num_cases','num_diseased', 'hospitalized']]
+data_all  = prepare_cases(data_all, col='num_cases', cutoff=0)
+data_all  = prepare_cases(data_all, col='num_diseased', cutoff=0)
+data_all = data_all.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_diseased':'death'})[['confirmed', 'death', 'hospitalized']]
+data_all = data_all.iloc[:-14]
+
+
 
 model = SEIRHD(
-    hospitalized     = data['death'].cumsum(),
-    confirmed        = data['confirmed'].cumsum(),
-    death            = data['death'].cumsum(),
+    hospitalized     = data_all['hospitalized'].cumsum(),
+    confirmed        = data_all['confirmed'].cumsum(),
+    death            = data_all['death'].cumsum(),
     T                = len(data),
     N                = 8181047,
     )
