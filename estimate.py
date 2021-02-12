@@ -1,5 +1,5 @@
 from functions.adjust_cases_functions import prepare_cases
-from seir_model import SEIRD
+from seird_model import SEIRD
 
 import matplotlib.pyplot as plt
 import scipy.io as sio

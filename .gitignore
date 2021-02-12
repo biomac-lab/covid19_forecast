@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 *.csv
+seir_model_original.py
 
 # C extensions
 *.so

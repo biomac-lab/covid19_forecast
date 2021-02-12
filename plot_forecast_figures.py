@@ -34,7 +34,6 @@ data['type']            = 'fitted'
 data.iloc[-14:]['type'] = 'preliminary'
 
 
-
 T_future = 27
 path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota',
                             pd.to_datetime(data[data.type=='fitted'].index.values[-1]).strftime('%Y-%m-%d'))

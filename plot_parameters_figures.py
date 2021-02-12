@@ -67,10 +67,8 @@ fig, ax = plt.subplots(1, 1, figsize=(15.5, 7))
 ax.plot(beta_df.index.values, beta_df["median"], color='darkred', alpha=0.4, label='Median - Nowcast')
 ax.fill_between(beta_df.index.values, beta_df["low_975"], beta_df["high_975"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
 ax.fill_between(beta_df.index.values, beta_df["low_75"], beta_df["high_75"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
-
 (y1_l, y2_l) = ax.get_ylim()
-
-#ax.scatter(dates_forecast, median[num_times-1:num_times+num_forecast-1], edgecolor='k', facecolor='white')#, label='Deaths')
+# ax.scatter(dates_forecast, median[num_times-1:num_times+num_forecast-1], edgecolor='k', facecolor='white')#, label='Deaths')
 ax.xaxis.set_major_locator(mdates.MonthLocator())
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
 ax.xaxis.set_minor_locator(mdates.DayLocator())
@@ -87,5 +85,4 @@ ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
 ax.set_ylabel(r'$\beta(t)$ - Contact Rate', size=15)
 fig.savefig(os.path.join('figures', 'mcmc', 'contact_rate.png'), dpi=300, bbox_inches='tight', transparent=False)
 fig.savefig(os.path.join(path_to_save, 'contact_rate.png'), dpi=300, bbox_inches='tight', transparent=False)
-
 plt.close()
