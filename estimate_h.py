@@ -25,16 +25,12 @@ data["num_diseased"].plot(ax=axes[0], color='red', linestyle='--')
 data["num_cases"].plot(ax=axes[1], color='k', linestyle='-')
 ax_tw = axes[1].twinx()
 data["num_infected_in_hospital"].plot(ax=ax_tw, color='blue', linestyle='--')
-
 plt.show()
 
 data = data.resample('D').sum().fillna(0)[['num_cases','num_diseased']]
 data  = prepare_cases(data, col='num_cases', cutoff=0)
 data  = prepare_cases(data, col='num_diseased', cutoff=0)
-
 data = data.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_diseased':'death'})[['confirmed', 'death']]
-
-
 data = data.iloc[:-14]
 
 model = SEIRHD(
@@ -44,7 +40,6 @@ model = SEIRHD(
     T                = len(data),
     N                = 8181047,
     )
-
 
 T_future = 27
 path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))

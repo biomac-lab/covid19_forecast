@@ -4,8 +4,8 @@ from global_config import config
 from functions.adjust_cases_functions import prepare_cases
 from functions.plot_utils import plot_fit
 from global_config import config
-from seir_model import SEIRModel
-from seir_model import SEIRD
+from models.seird_model import SEIRModel
+from models.seird_model import SEIRD
 
 from datetime import date, timedelta
 import pandas as pd
@@ -19,7 +19,7 @@ if len(sys.argv) < 2:
     raise NotImplementedError()
 else:
     poly_run  = int(sys.argv[1])
-    name_dir  = int(sys.argv[2])
+    name_dir  = str(sys.argv[2])
 
 data_dir            = config.get_property('data_dir_covid')
 geo_dir             = config.get_property('geo_dir')

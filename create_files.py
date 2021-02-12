@@ -15,7 +15,7 @@ if len(sys.argv) < 2:
     raise NotImplementedError()
 else:
     poly_run  = int(sys.argv[1])
-    name_dir  = int(sys.argv[2])
+    name_dir  = str(sys.argv[2])
 
 def load_samples(filename):
 
