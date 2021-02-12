@@ -1,15 +1,15 @@
-import jax
-import jax.numpy as np
-from jax.random import PRNGKey
 from jax.experimental.ode import odeint
+from jax.random import PRNGKey
+import jax.numpy as np
+import jax
 
+from numpyro.infer import MCMC, NUTS, Predictive
+import numpyro.distributions as dist
 import numpy as onp
 import numpyro
-import numpyro.distributions as dist
-from numpyro.infer import MCMC, NUTS, Predictive
 
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 
 def getter(f):
     '''
@@ -353,7 +353,6 @@ class Model():
     mean_dz = getter('mean_dz')
 
 
-
 class SEIRDBase(Model):
 
     compartments = ['S', 'E', 'I', 'R', 'H', 'D', 'C']
@@ -405,86 +404,6 @@ class SEIRDBase(Model):
 
 
 
-def clean_daily_obs(obs, radius=2):
-    '''Clean daily observations to fix negative elements'''
-
-    # This searches for a small window containing the negative element
-    # whose sum is non-negative, then sets each element in the window
-    # to the same value to preserve the sum. This ensures that cumulative
-    # sums of the daily time series are preserved to the extent possible.
-    # (They only change inside the window, over which the cumulative sum is
-    # linear.)
-
-    orig_obs = obs
-
-    # Subset to valid indices
-    inds = onp.isfinite(obs)
-    obs = obs[inds]
-
-    obs = onp.array(obs)
-    bad = onp.argwhere(obs < 0)
-
-    for ind in bad:
-
-        ind = ind[0]
-
-        if obs[ind] >= 0:
-            # it's conceivable the problem was fixed when
-            # we cleaned another bad value
-            continue
-
-        left = ind - radius
-        right = ind + radius + 1
-        tot = onp.sum(obs[left:right])
-
-        while tot < 0 and (left >= 0 or right <= len(obs)):
-            left -= 1
-            right += 1
-            tot = onp.sum(obs[left:right])
-
-        if tot < 0:
-            raise ValueError("Couldn't clean data")
-
-        n = len(obs[left:right])
-
-        avg = tot // n
-        rem = int(tot % n)
-
-        obs[left:right] = avg
-        obs[left:(left+rem)] += 1
-
-    assert(onp.nansum(orig_obs) == onp.nansum(obs))
-
-    orig_obs[inds] = obs
-    return orig_obs
-
-def nb2(mu=None, k=None):
-    conc = 1./k
-    rate = conc/mu
-    return dist.GammaPoisson(conc, rate)
-
-def observe_nb2(name, latent, det_prob, dispersion, obs=None):
-
-    mask = True
-    if obs is not None:
-        mask = np.isfinite(obs) & (obs >= 0.0)
-        obs = np.where(mask, obs, 0.0)
-
-    # --> gives error with newer jax/numpyro (on swarm2, with numpyro.enable_x64())
-    #if onp.any(np.logical_not(mask)):
-    #    warnings.warn('Some observed values are invalid')
-
-    det_prob = np.broadcast_to(det_prob, latent.shape)
-
-    mean = det_prob * latent
-    numpyro.deterministic("mean_" + name, mean)
-
-    d = nb2(mu=mean, k=dispersion)
-
-    with numpyro.handlers.mask(mask=mask):
-        y = numpyro.sample(name, d, obs = obs)
-
-    return y
 
 class SEIRDModel(SEIRModel):
 
