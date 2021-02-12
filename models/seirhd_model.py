@@ -446,7 +446,8 @@ class SEIRD(SEIRDBase):
                  num_frozen=0,
                  rw_use_last=1,
                  confirmed=None,
-                 death=None):
+                 death=None,
+                 hospitalized=None):
 
         '''
         Stochastic SEIR model. Draws random parameters and runs dynamics.
