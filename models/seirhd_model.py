@@ -448,13 +448,13 @@ class SEIRHD(SEIRHDBase):
         #I0 = numpyro.sample("I0", dist.Uniform(0, 300))
         #E0 = numpyro.sample("E0", dist.Uniform(0, 300*0.1))
         #H0 = numpyro.sample("H0", dist.Uniform(0, 300*0.1))
-        #D0 = numpyro.sample("D0", dist.Uniform(0, 300*0.1))
+        D0 = numpyro.sample("D0", dist.Uniform(0, 30))
 
         # Sample initial number of infected individuals
-        I0 = numpyro.sample("I0", dist.Uniform(0, 0.02*N))
-        E0 = numpyro.sample("E0", dist.Uniform(0, 0.02*N))
-        H0 = numpyro.sample("H0", dist.Uniform(0, 0.02*N))
-        D0 = numpyro.sample("D0", dist.Uniform(0, 0.02*N))
+        I0 = numpyro.sample("I0", dist.Uniform(0, 1000))
+        E0 = numpyro.sample("E0", dist.Uniform(0, 3000))
+        H0 = numpyro.sample("H0", dist.Uniform(0, 2000))
+        #D0 = numpyro.sample("D0", dist.Uniform(0, 0.02*N))
 
 
         # Sample dispersion parameters around specified values
@@ -498,7 +498,7 @@ class SEIRHD(SEIRHDBase):
                                     dist.Beta(0.01 * 100, (1-0.01) * 100))
 
         hosp_prob = numpyro.sample("hosp_prob",
-                                    dist.Beta(0.01 * 100, (1-0.01) * 100))
+                                    dist.Beta(0.05 * 100, (1-0.01) * 100))
                                     #dist.Beta(0.02 * 1000, (1-0.02) * 1000))
 
         death_rate = numpyro.sample("death_rate",
