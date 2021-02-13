@@ -33,15 +33,15 @@ data_all_raw = data_all.copy()
 
 # hospitalized cases only available since mid. may...
 data_all = data_all.dropna()
-fig, axes = plt.subplots(2,1)
-data_all["num_diseased"].plot(ax=axes[0], color='red', linestyle='--', label='Deaths')
-data_all["num_cases"].plot(ax=axes[1], color='k', linestyle='-', label='Cases')
-ax_tw = axes[1].twinx()
-data_all["hospitalized"].plot(ax=axes[1], color='blue', linestyle='--', label='Hosp')
-axes[0].legend()
-axes[1].legend()
-ax_tw.legend()
-plt.show()
+# fig, axes = plt.subplots(2,1)
+# data_all["num_diseased"].plot(ax=axes[0], color='red', linestyle='--', label='Deaths')
+# data_all["num_cases"].plot(ax=axes[1], color='k', linestyle='-', label='Cases')
+# ax_tw = axes[1].twinx()
+# data_all["hospitalized"].plot(ax=axes[1], color='blue', linestyle='--', label='Hosp')
+# axes[0].legend()
+# axes[1].legend()
+# ax_tw.legend()
+# plt.show()
 
 
 
@@ -57,12 +57,12 @@ model = SEIRHD(
     hospitalized     = data_all['hospitalized'].cumsum(),
     confirmed        = data_all['confirmed'].cumsum(),
     death            = data_all['death'].cumsum(),
-    T                = len(data),
+    T                = len(data_all),
     N                = 8181047,
     )
 
 T_future = 27
-path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
+path_to_save = os.path.join(results_dir, 'weekly_forecast' , 'bogota', 'hosp_'+pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
 
 if not os.path.exists(path_to_save):
     os.makedirs(path_to_save)
@@ -75,6 +75,29 @@ post_pred_samples = model.predictive()
 # Forecasting posterior predictive (do condition on observations)
 print(" * collecting forecast samples")
 forecast_samples = model.forecast(T_future=T_future)
+
+forecast_samples['mean_dz0'] = forecast_samples["dz0"]
+forecast_samples['mean_dy0'] = forecast_samples["dy0"]
+forecast_samples['mean_dh0'] = forecast_samples["dh0"]
+
+hosp_fitted   = model.combine_samples(forecast_samples, f='mean_dh', use_future=True)
+deaths_fitted = model.combine_samples(forecast_samples, f='mean_dz', use_future=True)
+cases_fitted  = model.combine_samples(forecast_samples, f='mean_dy', use_future=True)
+
+
+from functions.samples_utils import create_df_response
+
+df_hosp   = create_df_response(hosp_fitted, time=len(data_all), date_init ='2020-05-15',  forecast_horizon=27, use_future=True)
+df_deaths = create_df_response(deaths_fitted, time=len(data_all), date_init ='2020-05-15',  forecast_horizon=27, use_future=True)
+df_cases  = create_df_response(cases_fitted, time=len(data_all), date_init ='2020-05-15',  forecast_horizon=27, use_future=True)
+from functions.plot_utils import plot_fit
+
+data_all['type'] = 'fitted'
+plot_fit(df_hosp, data_all, col_data='death',   y_lim_up = 200, y_label='Deaths', color='indianred', path_to_save='figures/mcmc_2/deaths.png')
+plot_fit(df_cases,  data_all, col_data='confirmed', y_lim_up = 7000,  y_label='Cases', color='darksalmon', path_to_save='figures/mcmc_2/cases.png')
+plot_fit(df_deaths, data_all, col_data='hospitalized',   y_lim_up = 5000, y_label='Hospitalization', color='blue', path_to_save='figures/mcmc_2/hosp.png')
+
+
 
 save_fields=['beta0', 'beta', 'sigma', 'gamma', 'dy0', 'dy', 'mean_dy', 'mean_dy0',  'dy_future', 'mean_dy_future',
                 'dz0', 'dz', 'dz_future', 'mean_dz', 'mean_dz0', 'mean_dz_future',

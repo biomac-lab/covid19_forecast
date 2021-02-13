@@ -284,6 +284,7 @@ class SEIRModel(CompartmentModel):
         Seed infection. Return state vector for I exponsed out of N
         '''
         return np.stack([N-E-I, E, I, 0.0, I])
+
 class SEIRHDBase(Model):
 
     compartments = ['S', 'E', 'I', 'R', 'H', 'U', 'D', 'C']
@@ -350,9 +351,6 @@ class SEIRHDBase(Model):
         dy_mean = self.dy_mean(samples, **args)
         dy = dist.Normal(dy_mean, noise_scale * dy_mean).sample(PRNGKey(11))
         return dy
-
-
-
 
 class SEIRHDModel(SEIRModel):
 
@@ -452,6 +450,12 @@ class SEIRHD(SEIRHDBase):
         H0 = numpyro.sample("H0", dist.Uniform(0, 300*0.1))
         D0 = numpyro.sample("D0", dist.Uniform(0, 300*0.1))
 
+        # Sample initial number of infected individuals
+        #I0 = numpyro.sample("I0", dist.Uniform(0, 0.02*N))
+        #E0 = numpyro.sample("E0", dist.Uniform(0, 0.02*N))
+        #H0 = numpyro.sample("H0", dist.Uniform(0, 0.02*N))
+        #D0 = numpyro.sample("D0", dist.Uniform(0, 0.02*N))
+
 
         # Sample dispersion parameters around specified values
         death_dispersion = numpyro.sample("death_dispersion",
@@ -532,15 +536,15 @@ class SEIRHD(SEIRHDBase):
 
         # First observation
         with numpyro.handlers.scale(scale=0.5):
-            y0 = observe_nb2("dy0", x0[6], det_prob0, confirmed_dispersion, obs=confirmed0)
+            y0 = observe_nb2("dy0", x0[7], det_prob0, confirmed_dispersion, obs=confirmed0)
             #y0 = observe("dy0", x0[6], det_prob0, det_noise_scale, obs=confirmed0)
 
         with numpyro.handlers.scale(scale=2.0):
-            z0 = observe_nb2("dz0", x0[5], det_prob_d, death_dispersion, obs=death0)
+            z0 = observe_nb2("dz0", x0[6], det_prob_d, death_dispersion, obs=death0)
             #z0 = observe("dz0", x0[5], det_prob_d, det_noise_scale, obs=death0)
 
         with numpyro.handlers.scale(scale=2.0):
-            h0 = observe_nb2("dh0", x0[4], det_prob_d, hosp_dispersion, obs=hospitalized0)
+            h0 = observe_nb2("dh0", x0[5], det_prob_d, hosp_dispersion, obs=hospitalized0)
             #z0 = observe("dz0", x0[5], det_prob_d, det_noise_scale, obs=death0)
 
 
@@ -634,15 +638,15 @@ class SEIRHD(SEIRHDBase):
 
         # Noisy observations
         with numpyro.handlers.scale(scale=0.5):
-            y = observe_nb2("dy" + suffix, x_diff[0:,6], det_prob, confirmed_dispersion, obs = confirmed)
+            y = observe_nb2("dy" + suffix, x_diff[0:,7], det_prob, confirmed_dispersion, obs = confirmed)
             #y = observe("dy" + suffix, x_diff[:,6], det_prob, confirmed_dispersion, obs = confirmed)
 
         with numpyro.handlers.scale(scale=2.0):
-            z = observe_nb2("dz" + suffix, x_diff[0:,5], det_prob_d, death_dispersion, obs = death)
+            z = observe_nb2("dz" + suffix, x_diff[0:,6], det_prob_d, death_dispersion, obs = death)
             #z = observe("dz" + suffix, x_diff[:,5], det_prob_d, death_dispersion, obs = death)
 
         with numpyro.handlers.scale(scale=2.0):
-            h = observe_nb2("dh" + suffix, x_diff[0:,4], det_prob_d, hosp_dispersion, obs = hospitalized)
+            h = observe_nb2("dh" + suffix, x_diff[0:,5], det_prob_d, hosp_dispersion, obs = hospitalized)
             #h = observe_nb("dh" + suffix, x_diff[0:,4], det_prob_d, hosp_dispersion, obs = death)
 
 
