@@ -50,6 +50,7 @@ data_all  = prepare_cases(data_all, col='num_cases', cutoff=0)
 data_all  = prepare_cases(data_all, col='num_diseased', cutoff=0)
 data_all = data_all.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_diseased':'death'})[['confirmed', 'death', 'hospitalized']]
 data_all = data_all.iloc[:-14]
+data_all = data_all.iloc[:100]
 
 
 
@@ -93,9 +94,9 @@ df_cases  = create_df_response(cases_fitted, time=len(data_all), date_init ='202
 from functions.plot_utils import plot_fit
 
 data_all['type'] = 'fitted'
-plot_fit(df_hosp, data_all, col_data='death',   y_lim_up = 200, y_label='Deaths', color='indianred', path_to_save='figures/mcmc_2/deaths.png')
-plot_fit(df_cases,  data_all, col_data='confirmed', y_lim_up = 7000,  y_label='Cases', color='darksalmon', path_to_save='figures/mcmc_2/cases.png')
-plot_fit(df_deaths, data_all, col_data='hospitalized',   y_lim_up = 5000, y_label='Hospitalization', color='blue', path_to_save='figures/mcmc_2/hosp.png')
+plot_fit(df_deaths, data_all, col_data='death',   y_lim_up = 300, y_label='Deaths', color='indianred', path_to_save='figures/mcmc_2/deaths.png')
+plot_fit(df_cases,  data_all, col_data='confirmed',  y_lim_up = 7000,  y_label='Cases', color='darksalmon', path_to_save='figures/mcmc_2/cases.png')
+plot_fit(df_hosp, data_all,   col_data='hospitalized',   y_lim_up = 5000, y_label='Hospitalization', color='blue', path_to_save='figures/mcmc_2/hosp.png')
 
 
 

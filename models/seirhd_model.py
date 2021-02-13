@@ -365,11 +365,13 @@ class SEIRHDModel(SEIRModel):
         dS_dt = - beta * S * I / N
         dE_dt = beta * S * I / N - sigma * E
         dI_dt = sigma * E - gamma * (1 - hosp_prob) * I - gamma * hosp_prob * I
-        dH_dt = hosp_prob * gamma * I - death_rate * death_prob * H - gamma * (1-death_prob) * H
-        dR_dt = gamma * (1-death_prob) * H + gamma * hosp_prob * I
+        dH_dt = hosp_prob * gamma * I - death_rate * death_prob * H - gamma * (1 - death_prob) * H
+        dR_dt = gamma * (1-death_prob) * H + gamma * (1 - hosp_prob) * I
+
+
         dU_dt = hosp_prob * gamma * I       # Cum hosp
         dD_dt = death_rate * death_prob * H # Cum deaths
-        dC_dt = sigma * E                   # Cum incidence
+        dC_dt = beta * S * I / N                # Cum incidence
 
         return np.stack([dS_dt, dE_dt, dI_dt, dR_dt, dH_dt, dU_dt, dD_dt, dC_dt])
 
@@ -498,7 +500,7 @@ class SEIRHD(SEIRHDBase):
                                     dist.Beta(0.01 * 100, (1-0.01) * 100))
 
         hosp_prob = numpyro.sample("hosp_prob",
-                                    dist.Beta(0.05 * 100, (1-0.01) * 100))
+                                    dist.Beta(0.2 * 100, (1-0.2) * 100))
                                     #dist.Beta(0.02 * 1000, (1-0.02) * 1000))
 
         death_rate = numpyro.sample("death_rate",
@@ -646,7 +648,7 @@ class SEIRHD(SEIRHDBase):
             #z = observe("dz" + suffix, x_diff[:,5], det_prob_d, death_dispersion, obs = death)
 
         with numpyro.handlers.scale(scale=2.0):
-            h = observe_nb2("dh" + suffix, x_diff[0:,5], det_prob_d, hosp_dispersion, obs = hospitalized)
+            h = observe_nb2("dh" + suffix, x_diff[0:,5], 1, hosp_dispersion, obs = hospitalized)
             #h = observe_nb("dh" + suffix, x_diff[0:,4], det_prob_d, hosp_dispersion, obs = death)
 
 
