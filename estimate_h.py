@@ -43,8 +43,6 @@ data_all = data_all.dropna()
 # ax_tw.legend()
 # plt.show()
 
-
-
 data_all = data_all.resample('D').sum().fillna(0)[['num_cases','num_diseased', 'hospitalized']]
 data_all  = prepare_cases(data_all, col='num_cases', cutoff=0)
 data_all  = prepare_cases(data_all, col='num_diseased', cutoff=0)
@@ -60,6 +58,7 @@ model = SEIRHD(
     death            = data_all['death'].cumsum(),
     T                = len(data_all),
     N                = 8181047,
+    hosp_prob        = 0.1
     )
 
 T_future = 27
@@ -91,7 +90,13 @@ from functions.samples_utils import create_df_response
 df_hosp   = create_df_response(hosp_fitted, time=len(data_all), date_init ='2020-05-15',  forecast_horizon=27, use_future=True)
 df_deaths = create_df_response(deaths_fitted, time=len(data_all), date_init ='2020-05-15',  forecast_horizon=27, use_future=True)
 df_cases  = create_df_response(cases_fitted, time=len(data_all), date_init ='2020-05-15',  forecast_horizon=27, use_future=True)
+
+beta_samples = np.concatenate((np.expand_dims(samples["beta0"],-1), samples["beta"] ), axis=1)
+df_contact_rate  = create_df_response(beta_samples , time=beta_samples.shape[-1], date_init ='2020-05-15',  forecast_horizon=27, use_future=False)
+
+
 from functions.plot_utils import plot_fit
+from functions.plot_utils import *
 
 data_all['type'] = 'fitted'
 plot_fit(df_deaths, data_all, col_data='death',   y_lim_up = 300, y_label='Deaths', color='indianred', path_to_save='figures/mcmc_2/deaths.png')
@@ -99,6 +104,29 @@ plot_fit(df_cases,  data_all, col_data='confirmed',  y_lim_up = 7000,  y_label='
 plot_fit(df_hosp, data_all,   col_data='hospitalized',   y_lim_up = 5000, y_label='Hospitalization', color='blue', path_to_save='figures/mcmc_2/hosp.png')
 
 
+fig, ax = plt.subplots(1, 1, figsize=(15.5, 7))
+ax.plot(df_contact_rate.index.values, df_contact_rate["median"], color='darkred', alpha=0.4, label='Median - Nowcast')
+ax.fill_between(df_contact_rate.index.values, df_contact_rate["low_95"], df_contact_rate["high_95"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
+ax.fill_between(df_contact_rate.index.values, df_contact_rate["low_80"], df_contact_rate["high_80"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
+ax.fill_between(df_contact_rate.index.values, df_contact_rate["low_50"], df_contact_rate["high_50"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
+(y1_l, y2_l) = ax.get_ylim()
+# ax.scatter(dates_forecast, median[num_times-1:num_times+num_forecast-1], edgecolor='k', facecolor='white')#, label='Deaths')
+ax.xaxis.set_major_locator(mdates.MonthLocator())
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+ax.xaxis.set_minor_locator(mdates.DayLocator())
+ax.xaxis.set_major_locator(mdates.WeekdayLocator())
+ax.xaxis.set_major_locator(mdates.MonthLocator())
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['left'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.grid(which='major', axis='y', c='k', alpha=.1, zorder=-2)
+ax.tick_params(axis='both', labelsize=15)
+ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f}"))
+#ax.axvline(x = 37, linestyle='--',  label = '{}'.format(dates[-1].strftime('%b-%d')))
+ax.set_ylabel(r'$\beta(t)$ - Contact Rate', size=15)
+fig.savefig(os.path.join('figures', 'mcmc_2', 'contact_rate.png'), dpi=300, bbox_inches='tight', transparent=False)
+plt.close()
 
 save_fields=['beta0', 'beta', 'sigma', 'gamma', 'dy0', 'dy', 'mean_dy', 'mean_dy0',  'dy_future', 'mean_dy_future',
                 'dz0', 'dz', 'dz_future', 'mean_dz', 'mean_dz0', 'mean_dz_future',

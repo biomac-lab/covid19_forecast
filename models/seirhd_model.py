@@ -24,32 +24,31 @@ class CompartmentModel(object):
         Compute time derivative
         '''
         raise NotImplementedError()
-        return
 
 
     @classmethod
-    def run(cls, T, x0, theta, **kwargs):
+    def run(cls, tspan, x0, theta, **kwargs):
         # Theta is a tuple of parameters. Entries are
         # scalars or vectors of length T-1
         is_scalar = [np.ndim(a)==0 for a in theta]
         if onp.all(is_scalar):
-            return cls._run_static(T, x0, theta, **kwargs)
+            return cls._run_static(tspan, x0, theta, **kwargs)
         else:
-            return cls._run_time_varying(T, x0, theta, **kwargs)
+            return cls._run_time_varying(tspan, x0, theta, **kwargs)
 
     @classmethod
-    def _run_static(cls, T, x0, theta, rtol=1e-5, atol=1e-3, mxstep=500):
+    def _run_static(cls, tmax, x0, theta, rtol=1e-5, atol=1e-3, mxstep=500):
         '''
         x0 is shape (d,)
         theta is shape (nargs,)
         '''
-        t = np.arange(T, dtype='float') + 0.
+        t = np.arange(tmax, dtype='float') + 0.
         return odeint(cls.dx_dt, x0, t, *theta)
 
     @classmethod
-    def _run_time_varying(cls, T, x0, theta, rtol=1e-5, atol=1e-3, mxstep=500):
+    def _run_time_varying(cls, tmax, x0, theta, rtol=1e-5, atol=1e-3, mxstep=500):
 
-        theta = tuple(np.broadcast_to(a, (T-1,)) for a in theta)
+        theta = tuple(np.broadcast_to(a, (tmax-1,)) for a in theta)
 
         '''
         x0 is shape (d,)
@@ -62,7 +61,7 @@ class CompartmentModel(object):
             return x1, x1
 
         # Run T–1 steps of the dynamics starting from the intial distribution
-        _, X = jax.lax.scan(advance, x0, theta, T-1)
+        _, X = jax.lax.scan(advance, x0, theta, tmax-1)
         return np.vstack((x0, X))
 
     @classmethod
@@ -253,13 +252,13 @@ class SEIRModel(CompartmentModel):
         S, E, I, R, C = x
         N = S + E + I + R
 
-        dS_dt = - beta * S * I / N
-        dE_dt = beta * S * I / N - sigma * E
-        dI_dt = sigma * E - gamma * I
-        dR_dt = gamma * I
-        dC_dt = sigma * E  # incidence
+        sdot = - beta * S * I / N
+        edot = beta * S * I / N - sigma * E
+        idot = sigma * E - gamma * I
+        rdot = gamma * I
+        cdot = sigma * E  # incidence
 
-        return np.stack([dS_dt, dE_dt, dI_dt, dR_dt, dC_dt])
+        return np.stack([sdot, edot, idot, rdot, cdot])
 
     @classmethod
     def R0(cls, theta):
@@ -281,7 +280,7 @@ class SEIRModel(CompartmentModel):
     @classmethod
     def seed(cls, N=1e6, I=100., E=0.):
         '''
-        Seed infection. Return state vector for I exponsed out of N
+        Seed infection. Return state vector for I exposed out of N
         '''
         return np.stack([N-E-I, E, I, 0.0, I])
 
@@ -362,18 +361,18 @@ class SEIRHDModel(SEIRModel):
         S, E, I, R, H, U, D, C = x
         N = S + E + I + R + H + D
 
-        dS_dt = - beta * S * I / N
-        dE_dt = beta * S * I / N - sigma * E
-        dI_dt = sigma * E - gamma * (1 - hosp_prob) * I - gamma * hosp_prob * I
-        dH_dt = hosp_prob * gamma * I - death_rate * death_prob * H - gamma * (1 - death_prob) * H
-        dR_dt = gamma * (1-death_prob) * H + gamma * (1 - hosp_prob) * I
+        sdot = - beta * S * I / N
+        edot = beta * S * I / N - sigma * E
+        idot = sigma * E - gamma * (1 - hosp_prob) * I - gamma * hosp_prob * I
+        hdot = hosp_prob * gamma * I - death_rate * death_prob * H - gamma * (1 - death_prob) * H
+        rdot = gamma * (1-death_prob) * H + gamma * (1 - hosp_prob) * I
 
 
-        dU_dt = hosp_prob * gamma * I       # Cum hosp
-        dD_dt = death_rate * death_prob * H # Cum deaths
-        dC_dt = beta * S * I / N                # Cum incidence
+        udot = hosp_prob * gamma * I       # Cum hosp
+        ddot = death_rate * death_prob * H # Cum deaths
+        cdot = beta * S * I / N                # Cum incidence
 
-        return np.stack([dS_dt, dE_dt, dI_dt, dR_dt, dH_dt, dU_dt, dD_dt, dC_dt])
+        return np.stack([sdot, edot, idot, rdot, hdot, udot, ddot, cdot])
 
     @classmethod
     def seed(cls, N=1e6, I=100., E=0., R=0.0, U=0.0, H=0.0, D=0.0):
@@ -432,6 +431,8 @@ class SEIRHD(SEIRHDBase):
                  det_prob_conc = 50.,
                  confirmed_dispersion=0.3,
                  death_dispersion=0.3,
+                 hosp_prob  = 0.2,
+                 death_prob = 0.01,
                  hosp_dispersion=0.3,
                  rw_scale = 2e-1,
                  det_noise_scale=0.15,
@@ -497,10 +498,10 @@ class SEIRHD(SEIRHDBase):
                                               (1-.9) * 100))
 
         death_prob = numpyro.sample("death_prob",
-                                    dist.Beta(0.01 * 100, (1-0.01) * 100))
+                                    dist.Beta(death_prob * 100, (1-death_prob) * 100))
 
         hosp_prob = numpyro.sample("hosp_prob",
-                                    dist.Beta(0.2 * 100, (1-0.2) * 100))
+                                    dist.Beta(hosp_prob * 100, (1-hosp_prob) * 100))
                                     #dist.Beta(0.02 * 1000, (1-0.02) * 1000))
 
         death_rate = numpyro.sample("death_rate",

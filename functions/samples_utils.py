@@ -1,7 +1,7 @@
 import pandas as pd
 import datetime
 
-def create_df_response(samples, time, date_init ='2020-03-06',  forecast_horizon=27, use_future=False):
+def create_df_response(samples, time, date_init ='2020-03-06',  quantiles = [50, 80, 95], forecast_horizon=27, use_future=False):
     """[summary]
 
     Args:
@@ -28,14 +28,13 @@ def create_df_response(samples, time, date_init ='2020-03-06',  forecast_horizon
     df_response['mean']        = results_df.mean(axis=1).values
     df_response['median']      = results_df.median(axis=1).values
     df_response['std']         = results_df.std(axis=1).values
-    df_response['low_975']      = results_df.quantile(q=0.025, axis=1).values
-    df_response['high_975']     = results_df.quantile(q=0.975, axis=1).values
 
-    df_response['low_90']      = results_df.quantile(q=0.1, axis=1).values
-    df_response['high_90']     = results_df.quantile(q=0.9, axis=1).values
+    for quant in quantiles:
+        low_q  = ((100-quant)/2)/100
+        high_q = 1-low_q
 
-    df_response['low_75']      = results_df.quantile(q=0.25, axis=1).values
-    df_response['high_75']     = results_df.quantile(q=0.75, axis=1).values
+        df_response[f'low_{quant}']  = results_df.quantile(q=low_q, axis=1).values
+        df_response[f'high_{quant}'] = results_df.quantile(q=high_q, axis=1).values
 
     df_response['type']        =  types
     df_response.index.name = 'date'

@@ -56,11 +56,13 @@ def load_samples(filename):
     return mcmc_samples, post_pred_samples, forecast_samples
 
 
+
 mcmc_samples, _, _ = load_samples(os.path.join(path_to_save, 'samples.npz'))
 
 beta = mcmc_samples['beta']
 
-beta_df = create_df_response(beta, beta.shape[-1], date_init ='2020-03-06',  forecast_horizon=27, use_future=False)
+beta_df = create_df_response(beta, beta.shape[-1], date_init ='2020-03-06', quantiles = [50, 80, 95],  forecast_horizon=int(7*4), use_future=False)
+
 
 fig, ax = plt.subplots(1, 1, figsize=(15.5, 7))
 ax.plot(beta_df.index.values, beta_df["median"], color='darkred', alpha=0.4, label='Median - Nowcast')
