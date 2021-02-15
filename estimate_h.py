@@ -33,15 +33,7 @@ data_all_raw = data_all.copy()
 
 # hospitalized cases only available since mid. may...
 data_all = data_all.dropna()
-# fig, axes = plt.subplots(2,1)
-# data_all["num_diseased"].plot(ax=axes[0], color='red', linestyle='--', label='Deaths')
-# data_all["num_cases"].plot(ax=axes[1], color='k', linestyle='-', label='Cases')
-# ax_tw = axes[1].twinx()
-# data_all["hospitalized"].plot(ax=axes[1], color='blue', linestyle='--', label='Hosp')
-# axes[0].legend()
-# axes[1].legend()
-# ax_tw.legend()
-# plt.show()
+
 
 data_all = data_all.resample('D').sum().fillna(0)[['num_cases','num_diseased', 'hospitalized']]
 data_all  = prepare_cases(data_all, col='num_cases', cutoff=0)
@@ -51,6 +43,15 @@ data_all = data_all.iloc[:-14]
 data_all = data_all.iloc[:100]
 
 
+fig, axes = plt.subplots(2,1)
+data_all["death"].plot(ax=axes[0], color='red', linestyle='--', label='Deaths')
+data_all["confirmed"].plot(ax=axes[1], color='k', linestyle='-', label='Cases')
+ax_tw = axes[1].twinx()
+data_all["hospitalized"].plot(ax=axes[1], color='blue', linestyle='--', label='Hosp')
+axes[0].legend()
+axes[1].legend()
+ax_tw.legend()
+plt.show()
 
 model = SEIRHD(
     hospitalized     = data_all['hospitalized'].cumsum(),
