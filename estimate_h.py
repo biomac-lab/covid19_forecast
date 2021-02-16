@@ -104,18 +104,17 @@ cases_fitted  = model.combine_samples(forecast_samples, f='mean_dy', use_future=
 
 from functions.samples_utils import create_df_response
 
-df_hosp   = create_df_response(hosp_fitted, time=len(data_all), date_init ='2020-05-15',  forecast_horizon=27, use_future=True)
-df_deaths = create_df_response(deaths_fitted, time=len(data_all), date_init ='2020-05-15',  forecast_horizon=27, use_future=True)
-df_cases  = create_df_response(cases_fitted, time=len(data_all), date_init ='2020-05-15',  forecast_horizon=27, use_future=True)
+df_hosp   = create_df_response(hosp_fitted, time=len(data_fit), date_init ='2020-03-06',  forecast_horizon=28, use_future=True)
+df_deaths = create_df_response(deaths_fitted, time=len(data_fit), date_init ='2020-03-06',  forecast_horizon=28, use_future=True)
+df_cases  = create_df_response(cases_fitted, time=len(data_fit), date_init ='2020-03-06',  forecast_horizon=28, use_future=True)
 
 beta_samples     = np.concatenate((np.expand_dims(samples["beta0"],-1), samples["beta"] ), axis=1)
-df_contact_rate  = create_df_response(beta_samples , time=beta_samples.shape[-1], date_init ='2020-05-15',  forecast_horizon=27, use_future=False)
+df_contact_rate  = create_df_response(beta_samples , time=beta_samples.shape[-1], date_init ='2020-03-06',  forecast_horizon=28, use_future=False)
 
 
 from functions.plot_utils import plot_fit
 from functions.plot_utils import *
 
-data_all['type'] = 'fitted'
 plot_fit(df_deaths, data_all, col_data='death',   y_lim_up = 300, y_label='Deaths', color='indianred', path_to_save='figures/mcmc_2/deaths.png')
 plot_fit(df_cases,  data_all, col_data='confirmed',  y_lim_up = 7000,  y_label='Cases', color='darksalmon', path_to_save='figures/mcmc_2/cases.png')
 plot_fit(df_hosp, data_all,   col_data='uci',   y_lim_up = 5000, y_label='Hospitalization', color='blue', path_to_save='figures/mcmc_2/hosp.png')
