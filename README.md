@@ -28,6 +28,8 @@ We fit a mechanistic model with an Ensemble Adjustment Kalman Filter (EAKF) in t
 
 [2] Gibson, G. C., Reich, N. G., & Sheldon, D. (2020). Real-time mechanistic bayesian forecasts of covid-19 mortality. 1–33.
 
-[3] Ionides, E. L., Bretó, C., & King, A. A. (2006). Inference for nonlinear dynamical systems. Proceedings of the National Academy of Sciences of the United States of America, 103(49), 18438–18443. https://doi.org/10.1073/pnas.0603181103
+[3] Anderson, J. L. (2001). An Ensemble Adjustment Kalman Filter for Data Assimilation. Australian Meteorological Magazine, 129(2), 2884–2887.
 
-[4] King AA, Nguyen D and Ionides EL (2015) Statistical inference for partially observed Markov processes via the R package pomp. arXiv preprint arXiv:1509.00503.
+[4] Ionides, E. L., Bretó, C., & King, A. A. (2006). Inference for nonlinear dynamical systems. Proceedings of the National Academy of Sciences of the United States of America, 103(49), 18438–18443. https://doi.org/10.1073/pnas.0603181103
+
+[5] King AA, Nguyen D and Ionides EL (2015) Statistical inference for partially observed Markov processes via the R package pomp. arXiv preprint arXiv:1509.00503.
