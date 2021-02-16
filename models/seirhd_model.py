@@ -364,13 +364,11 @@ class SEIRHDModel(SEIRModel):
         sdot = - beta * S * I / N
         edot = beta * S * I / N - sigma * E
         idot = sigma * E - gamma * (1 - hosp_prob) * I - gamma * hosp_prob * I
-        hdot = hosp_prob * gamma * I - death_rate * death_prob * H - gamma * (1 - death_prob) * H
-        rdot = gamma * (1-death_prob) * H + gamma * (1 - hosp_prob) * I
-
-
+        hdot = hosp_prob * gamma * I - death_rate * death_prob * H - death_rate * (1 - death_prob) * H
+        rdot = death_rate * (1-death_prob) * H + gamma * (1 - hosp_prob) * I
         udot = hosp_prob * gamma * I       # Cum hosp
         ddot = death_rate * death_prob * H # Cum deaths
-        cdot = beta * S * I / N                # Cum incidence
+        cdot = beta * S * I / N            # Cum incidence
 
         return np.stack([sdot, edot, idot, rdot, hdot, udot, ddot, cdot])
 
@@ -433,7 +431,7 @@ class SEIRHD(SEIRHDBase):
                  death_dispersion=0.3,
                  hosp_prob  = 0.2,
                  death_prob = 0.01,
-                 hosp_dispersion=0.3,
+                 hosp_dispersion=0.7,
                  rw_scale = 2e-1,
                  det_noise_scale=0.15,
                  forecast_rw_scale = 0.,
@@ -451,12 +449,12 @@ class SEIRHD(SEIRHDBase):
         #I0 = numpyro.sample("I0", dist.Uniform(0, 300))
         #E0 = numpyro.sample("E0", dist.Uniform(0, 300*0.1))
         #H0 = numpyro.sample("H0", dist.Uniform(0, 300*0.1))
-        D0 = numpyro.sample("D0", dist.Uniform(0, 30))
+        D0 = numpyro.sample("D0", dist.Uniform(0, 100))
 
         # Sample initial number of infected individuals
-        I0 = numpyro.sample("I0", dist.Uniform(0, 1000))
-        E0 = numpyro.sample("E0", dist.Uniform(0, 3000))
-        H0 = numpyro.sample("H0", dist.Uniform(0, 2000))
+        I0 = numpyro.sample("I0", dist.Uniform(0, 0.02*N))
+        E0 = numpyro.sample("E0", dist.Uniform(0, 0.02*N))
+        H0 = numpyro.sample("H0", dist.Uniform(0, 0.02*N))
         #D0 = numpyro.sample("D0", dist.Uniform(0, 0.02*N))
 
 
@@ -497,16 +495,20 @@ class SEIRHD(SEIRHDBase):
                                     dist.Beta(.9 * 100,
                                               (1-.9) * 100))
 
+        det_prob_h = numpyro.sample("det_prob_h",
+                                    dist.Beta(.9 * 100,
+                                              (1-.9) * 100))
+
         death_prob = numpyro.sample("death_prob",
                                     dist.Beta(death_prob * 100, (1-death_prob) * 100))
 
         hosp_prob = numpyro.sample("hosp_prob",
                                     dist.Beta(hosp_prob * 100, (1-hosp_prob) * 100))
-                                    #dist.Beta(0.02 * 1000, (1-0.02) * 1000))
+                                    # dist.Beta(0.02 * 1000, (1-0.02) * 1000))
 
         death_rate = numpyro.sample("death_rate",
                                     dist.Gamma(10, 10 * H_duration_est))
-                                    #dist.Gamma(100, 100 * H_duration_est))
+                                    # dist.Gamma(100, 100 * H_duration_est))
 
         if drift_scale is not None:
             drift = numpyro.sample("drift", dist.Normal(loc=0., scale=drift_scale))
@@ -547,7 +549,7 @@ class SEIRHD(SEIRHDBase):
             #z0 = observe("dz0", x0[5], det_prob_d, det_noise_scale, obs=death0)
 
         with numpyro.handlers.scale(scale=2.0):
-            h0 = observe_nb2("dh0", x0[5], det_prob_d, hosp_dispersion, obs=hospitalized0)
+            h0 = observe_nb2("dh0", x0[5], det_prob_h, hosp_dispersion, obs=hospitalized0)
             #z0 = observe("dz0", x0[5], det_prob_d, det_noise_scale, obs=death0)
 
 
@@ -563,7 +565,8 @@ class SEIRHD(SEIRHDBase):
                   hosp_prob,
                   death_prob,
                   death_rate,
-                  det_prob_d)
+                  det_prob_d,
+                  det_prob_h)
 
         beta, det_prob, x, y, z, h = self.dynamics(T,
                                                 params,
@@ -592,7 +595,8 @@ class SEIRHD(SEIRHDBase):
                       hosp_prob,
                       death_prob,
                       death_rate,
-                      det_prob_d)
+                      det_prob_d,
+                      det_prob_h)
 
             beta_f, det_rate_rw_f, x_f, y_f, z_f, h_f = self.dynamics(T_future+1,
                                                                  params,
@@ -620,7 +624,8 @@ class SEIRHD(SEIRHDBase):
         hosp_prob, \
         death_prob, \
         death_rate, \
-        det_prob_d = params
+        det_prob_d, \
+        det_prob_h = params
 
         rw = frozen_random_walk("rw" + suffix,
                                 num_steps=T-1,
@@ -649,7 +654,7 @@ class SEIRHD(SEIRHDBase):
             #z = observe("dz" + suffix, x_diff[:,5], det_prob_d, death_dispersion, obs = death)
 
         with numpyro.handlers.scale(scale=2.0):
-            h = observe_nb2("dh" + suffix, x_diff[0:,5], 1, hosp_dispersion, obs = hospitalized)
+            h = observe_nb2("dh" + suffix, x_diff[0:,5], det_prob_h, hosp_dispersion, obs = hospitalized)
             #h = observe_nb("dh" + suffix, x_diff[0:,4], det_prob_d, hosp_dispersion, obs = death)
 
 
@@ -693,7 +698,6 @@ class SEIRHD(SEIRHDBase):
 
     def h0(self, **args):
         return self.h0(**args)
-
 
     def h(self, samples, **args):
         '''Get cumulative hospitalizations from incident ones'''
