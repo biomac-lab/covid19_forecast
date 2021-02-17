@@ -14,7 +14,7 @@ We present forecasts in 4 week-format daily cases and deaths horizon.
 ![Deaths Forecast](/figures/mcmc/deaths.png "Deaths Forecasts")
 
 ## Recovered Population
-We fit a mechanistic model with an Ensemble Adjustment Kalman Filter (EAKF) in the iterative filtering (IF) framework for estimate past symptomatic/reported and asymptomatic/unreported transmission rates and current state variables. Below we present the estimated fraction of recovered individuals. We compare (not fit) our model to the results of the [seroprevalence study](https://www.ins.gov.co/estudio-nacional-de-seroprevalencia/reporte.html) from the national health institute (INS).
+We fit a mechanistic model with an Ensemble Adjustment Kalman Filter (EAKF) in the iterative filtering (IF) framework for estimate past symptomatic/reported and asymptomatic/unreported transmission rates and current state variables. Below we present the estimated fraction of recovered individuals. We compare (not fit) our model to the estimated total number of past infected individuals as of November 15h of the [seroprevalence study](https://www.ins.gov.co/estudio-nacional-de-seroprevalencia/reporte.html) from the national health institute (INS).
 
 ![Estimated fraction of recovered individuals](/figures/eakf/recovered.png "Contact rate")
 
