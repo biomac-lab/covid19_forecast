@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from global_config import config
 
 from functions.adjust_cases_functions import prepare_cases
-from seir_model import SEIRD
+from models.seird_model import SEIRD
 
 import matplotlib.pyplot as plt
 import scipy.io as sio
@@ -66,8 +66,8 @@ beta_df = create_df_response(beta, beta.shape[-1], date_init ='2020-03-06', quan
 
 fig, ax = plt.subplots(1, 1, figsize=(15.5, 7))
 ax.plot(beta_df.index.values, beta_df["median"], color='darkred', alpha=0.4, label='Median - Nowcast')
-ax.fill_between(beta_df.index.values, beta_df["low_975"], beta_df["high_975"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
-ax.fill_between(beta_df.index.values, beta_df["low_75"], beta_df["high_75"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
+ax.fill_between(beta_df.index.values, beta_df["low_95"], beta_df["high_95"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
+ax.fill_between(beta_df.index.values, beta_df["low_80"], beta_df["high_80"], color='darkred', alpha=0.4, label='95 CI - Nowcast')
 (y1_l, y2_l) = ax.get_ylim()
 # ax.scatter(dates_forecast, median[num_times-1:num_times+num_forecast-1], edgecolor='k', facecolor='white')#, label='Deaths')
 ax.xaxis.set_major_locator(mdates.MonthLocator())
