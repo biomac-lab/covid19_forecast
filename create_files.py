@@ -27,7 +27,7 @@ def load_samples(filename):
 
     return mcmc_samples, post_pred_samples, forecast_samples
 
-
+print("** Creating Files")
 data_dir            = config.get_property('data_dir_covid')
 geo_dir             = config.get_property('geo_dir')
 data_dir_mnps       = config.get_property('data_dir_col')
@@ -71,31 +71,8 @@ forecast_samples['mean_dy0'] = forecast_samples["dy0"]
 deaths_fitted = model.combine_samples(forecast_samples, f='mean_dz', use_future=True)
 cases_fitted  = model.combine_samples(forecast_samples, f='mean_dy', use_future=True)
 
-
-
 df_deaths = create_df_response(deaths_fitted, time=len(data), date_init ='2020-03-06',  forecast_horizon=27, use_future=True)
 df_cases  = create_df_response(cases_fitted, time=len(data), date_init ='2020-03-06',  forecast_horizon=27, use_future=True)
 
 df_deaths.to_csv(os.path.join(path_to_save, 'deaths_df.csv'))
 df_cases.to_csv(os.path.join(path_to_save, 'cases_df.csv'))
-
-
-## Compute growth rate over time
-#beta  = mcmc_samples['beta']
-#sigma = mcmc_samples['sigma'][:,None]
-#gamma = mcmc_samples['gamma'][:,None]
-#
-## compute Rt
-#rt = SEIRModel.R0((beta, sigma, gamma))
-#results_df = pd.DataFrame(rt.T)
-#
-#df_rt = pd.DataFrame(index=t)
-#
-## Calculate key statistics
-#df_rt['mean']        = results_df.mean(axis=1).values
-#df_rt['median']      = results_df.median(axis=1).values
-#df_rt['sdv']         = results_df.std(axis=1).values
-#df_rt['low_ci_05']   = results_df.quantile(q=0.05, axis=1).values
-#df_rt['high_ci_95']  = results_df.quantile(q=0.95, axis=1).values
-#df_rt['low_ci_025']  = results_df.quantile(q=0.025, axis=1).values
-#df_rt['high_ci_975'] = results_df.quantile(q=0.975, axis=1).values

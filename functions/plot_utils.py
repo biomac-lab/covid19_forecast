@@ -5,10 +5,6 @@ from matplotlib.patches import Patch
 from matplotlib import pyplot as plt
 from matplotlib import ticker
 
-from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
-from mpl_toolkits.axes_grid1.inset_locator import mark_inset
-from mpl_toolkits.axes_grid.inset_locator import inset_axes
-
 import os
 def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', col_data='smoothed_death', col_up='high_95', col_down='low_95', col_point='median', ax=None,   forecast=True, path_to_save=None):
     """ df_fit with columns:
