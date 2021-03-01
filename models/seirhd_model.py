@@ -420,7 +420,7 @@ class SEIRHD(SEIRHDBase):
                  T_future = 0,
                  E_duration_est = 4.0,
                  I_duration_est = 2.0,
-                 H_duration_est = 10.0,
+                 H_duration_est = 12.0,
                  R0_est = 3.0,
                  beta_shape = 1.,
                  sigma_shape = 100.,
@@ -507,7 +507,7 @@ class SEIRHD(SEIRHDBase):
                                     # dist.Beta(0.02 * 1000, (1-0.02) * 1000))
 
         death_rate = numpyro.sample("death_rate",
-                                    dist.Gamma(10, 10 * H_duration_est))
+                                    dist.Gamma(100, 100 * H_duration_est))
                                     # dist.Gamma(100, 100 * H_duration_est))
 
         if drift_scale is not None:
