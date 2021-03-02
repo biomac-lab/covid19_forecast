@@ -7,6 +7,10 @@ __pycache__/
 *.csv
 seir_model_original.py
 models/seir_model_original.py
+eakf_m/*
+./eakf_m
+*.m
+*.mat
 
 # C extensions
 *.so
