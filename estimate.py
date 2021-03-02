@@ -44,7 +44,7 @@ model = SEIRD(
     )
 
 
-T_future = 27
+T_future = 100
 path_to_save = os.path.join(results_dir, 'weekly_forecast' , name_dir, pd.to_datetime(data.index.values[-1]).strftime('%Y-%m-%d'))
 print("**** **** **** Fitting until {}".format(pd.to_datetime(data.index.values[-1]).strftime('%Y-%b-%d')))
 

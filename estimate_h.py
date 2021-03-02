@@ -24,7 +24,8 @@ agglomerated_folder = os.path.join(data_dir, 'data_stages', 'colombia', 'agglome
 
 data = pd.read_csv(os.path.join(agglomerated_folder, 'cases.csv'), parse_dates=['date_time'], dayfirst=True).set_index('poly_id').loc[11001]#.set_index('date_time')
 hosp = pd.read_csv(hosp_url, encoding='ISO-8859-1', sep=';', dtype=str, skiprows=4, skipfooter=2, engine='python'
-                    ).rename(columns={'Fecha': 'date_time', 'Camas ocupadas COVID 19': 'hospitalized', 'Camas asignadas COVID 19':'total_beds'})
+                    ).rename(columns={'Fecha': 'date_time', 'Camas Ocupadas COVID 19': 'hospitalized', 'Camas asignadas COVID 19':'total_beds'})
+
 hosp['hospitalized'] = hosp["hospitalized"].apply(lambda x: int(x.replace('.', '')))
 hosp['total_beds']   = hosp["total_beds"].apply(lambda x: int(x.replace('.', '')))
 hosp["date_time"]    =  pd.to_datetime(hosp["date_time"], format='%d/%m/%Y')
