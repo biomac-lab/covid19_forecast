@@ -59,6 +59,7 @@ samples = model.infer(num_warmup=400, num_samples=2000, num_chains=1)
 # In-sample posterior predictive samples (don't condition on observations)
 print(" * collecting in-sample predictive samples")
 post_pred_samples = model.predictive()
+
 # Forecasting posterior predictive (do condition on observations)
 print(" * collecting forecast samples")
 forecast_samples = model.forecast(T_future=T_future)

@@ -42,7 +42,7 @@ data['type']            = 'fitted'
 data.iloc[-14:]['type'] = 'preliminary'
 
 
-T_future = 27
+T_future = 28
 path_to_save = os.path.join(results_dir, 'weekly_forecast' , name_dir,
                             pd.to_datetime(data[data.type=='fitted'].index.values[-1]).strftime('%Y-%m-%d'))
 
@@ -50,12 +50,14 @@ path_to_save = os.path.join(results_dir, 'weekly_forecast' , name_dir,
 df_deaths = pd.read_csv(os.path.join(path_to_save, 'deaths_df.csv'))
 df_deaths['date'] = pd.to_datetime(df_deaths['date'])
 df_deaths = df_deaths.set_index('date')
+df_deaths = df_deaths.iloc[:len(data)+T_future]
 
 df_cases  = pd.read_csv(os.path.join(path_to_save, 'cases_df.csv')) #.set_index('date')
 df_cases['date'] = pd.to_datetime(df_cases['date'])
 df_cases = df_cases.set_index('date')
+df_cases = df_cases.iloc[:len(data)+T_future]
 
-plot_fit(df_deaths, data, col_data='smoothed_death',   y_lim_up = 200, y_label='Deaths', color='indianred', path_to_save='figures/mcmc/deaths.png')
+plot_fit(df_deaths, data, col_data='smoothed_death',   y_lim_up = 150, y_label='Deaths', color='indianred', path_to_save='figures/mcmc/deaths.png')
 plot_fit(df_cases, data, col_data='smoothed_confirmed', y_lim_up = 7000,  y_label='Cases', color='darksalmon', path_to_save='figures/mcmc/cases.png')
 
 os.popen('cp figures/mcmc/deaths.png {}'.format(os.path.join(path_to_save, 'deaths.png')))
@@ -69,5 +71,4 @@ im2 = Image.open('figures/mcmc/cases.png').convert('RGB')
 im_list = [im2]
 
 pdf1_filename = "./report_{}.pdf".format(pd.to_datetime(data[data.type=='fitted'].index.values[-1]).strftime('%Y-%m-%d'))
-
 im1.save(pdf1_filename, "PDF" ,resolution=100.0, save_all=True, append_images=im_list)
