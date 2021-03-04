@@ -270,7 +270,7 @@ for n=1:Iter
         plot(1:num_times, obs_truth_hosp(1,:),'bx')
         legend('Fit Hosp','Data Hosp')
         hold off
-            
+        drawnow
     
     end
     parameters = theta(:,end); % estimated parameters

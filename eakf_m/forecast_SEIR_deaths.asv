@@ -292,7 +292,6 @@ end
 x_forecast = x_post_sim;
 % where to save the forecast
 save(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', 'deaths_post_forecast') , 'obs_temp_H');
-save(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', 'obs_post_forecast') , 'obs_temp');
 save(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', 'xpost_forecast') , 'x_forecast');
 save(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', 'recovered') , 'recovered_all');
 save(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', 'infected') , 'infected_all');

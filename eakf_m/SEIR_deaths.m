@@ -66,8 +66,6 @@ for t= ts+dt:dt:ts+tmstep
     
     %first step
     % susceptible
-
-
     % S*I/N -> E
     Eexps = dt1*(ones(num_loc,1)*beta).*S(:,:,tcnt).*Is(:,:,tcnt)./pop;    
     % S*A/N -> E
@@ -159,11 +157,11 @@ for t= ts+dt:dt:ts+tmstep
 
     %%%%%%%%%% stochastic version
 
-    Eexps    = poissrnd(Eexps);
+    Eexps  = poissrnd(Eexps);
     Eexpa  = poissrnd(Eexpa);
     Einfs  = poissrnd(Einfs);
     Einfa  = poissrnd(Einfa);
-    Einfd = poissrnd(Einfd);
+    Einfd  = poissrnd(Einfd);
     Edeath = poissrnd(Edeath);
     Erecs  = poissrnd(Erecs);
     Ereca  = poissrnd(Ereca);
@@ -267,7 +265,7 @@ for t= ts+dt:dt:ts+tmstep
     Eexpa = poissrnd(Eexpa);
     Einfs = poissrnd(Einfs);
     Einfa = poissrnd(Einfa);
-    Einfd =poissrnd(Einfd);
+    Einfd = poissrnd(Einfd);
     Edeath = poissrnd(Edeath);
     Erecs = poissrnd(Erecs);
     Ereca = poissrnd(Ereca);
