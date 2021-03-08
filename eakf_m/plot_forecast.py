@@ -58,19 +58,19 @@ path_to_checkpoints = os.path.join(results_dir, name_dir, 'checkpoints_agg')
 x_post_frcst      = sio.loadmat(os.path.join( path_to_checkpoints, 'xpost_forecast'))['x_forecast']
 obs_post_frcst    = sio.loadmat(os.path.join( path_to_checkpoints, 'obs_post_forecast'))['obs_temp']
 deaths_post_frcst = sio.loadmat(os.path.join( path_to_checkpoints, 'deaths_post_forecast'))['obs_temp_H']
-para_post         = sio.loadmat(os.path.join( path_to_checkpoints, '400_para_post_mean.mat'))['para_post_mean']
-x_post            = sio.loadmat(os.path.join( path_to_checkpoints, '400_x_post'))['x_post']
+para_post         = sio.loadmat(os.path.join( path_to_checkpoints, '100_para_post_mean.mat'))['para_post_mean']
+x_post            = sio.loadmat(os.path.join( path_to_checkpoints, '20_x_post'))['x_post']
 
-deaths_forecast = deaths_post_frcst
-obs_forecast    = obs_post_frcst
+deaths_forecast = x_post[6,:,:] #deaths_post_frcst
+obs_forecast    = x_post[5,:,:] #obs_post_frcst
+
 import seaborn as sns
 import itertools
-
 def create_sample_response(samples, num_times, min_date):
     df_samples_response = pd.DataFrame(columns=['date','ens_id','value', 'type'])
-    df_samples_response['ens_id'] = list(itertools.chain(* [[id]*deaths_forecast.shape[-1] for id in range(300)]))
-    df_samples_response['date']   = list(pd.date_range(start=pd.to_datetime(data[data.type=='fitted'].index.values[0]).strftime('%Y-%m-%d'), periods=deaths_forecast.shape[-1]))*300
-    df_samples_response['value']  = deaths_forecast.reshape(-1)
+    df_samples_response['ens_id'] = list(itertools.chain(* [[id]*samples.shape[-1] for id in range(300)]))
+    df_samples_response['date']   = list(pd.date_range(start=min_date, periods=samples.shape[-1]))*300
+    df_samples_response['value']  = samples.reshape(-1)
     df_samples_response['type']   = ['forecast']*len(df_samples_response)
     df_samples_response['type'][ df_samples_response.date.isin(list(data[data.type=='fitted'].index.values))]   =  'fitted'
     df_samples_response['value_mod'] = np.nan
@@ -79,25 +79,24 @@ def create_sample_response(samples, num_times, min_date):
 
     return df_samples_response
 
+min_date  = pd.to_datetime(data[data.type=='fitted'].index.values[0]).strftime('%Y-%m-%d')
+num_times = x_post.shape[-1]
+
+df_deaths = create_sample_response(deaths_forecast, num_times=num_times, min_date=min_date)
+df_cases  = create_sample_response(obs_forecast, num_times=num_times, min_date=min_date)
+
 fig, ax = plt.subplots(1, 1, figsize=(15.5, 7.2))
 sns.lineplot(ax=ax, data=df_deaths[df_deaths.type=='fitted'], x="date", y="value_mod")
-
 data_p = data[data.type=='fitted']
-ax.scatter(data_p.index.values, data_p.smoothed_death)
+ax.scatter(data_p.index.values, data_p.smoothed_death, edgecolor='black', facecolor='red')
 ax.set_ylim([0, 200])
 plt.show()
 
 
-deaths_forecast = x_post_frcst[6,:,:len(data[data.type=='fitted'])]
-df_deaths = pd.DataFrame(columns=['date','ens_id','value', 'type'])
-df_deaths['ens_id'] = list(itertools.chain(* [[id]*deaths_forecast.shape[-1] for id in range(300)]))
-df_deaths['date']   = list(pd.date_range(start=pd.to_datetime(data[data.type=='fitted'].index.values[0]).strftime('%Y-%m-%d'), periods=deaths_forecast.shape[-1]))*300
-df_deaths['value']  = deaths_forecast.reshape(-1)
-df_deaths['type']   = ['forecast']*len(df_deaths)
-df_deaths['type'][ df_deaths.date.isin(list(data[data.type=='fitted'].index.values))]   =  'fitted'
-df_deaths['value_mod'] = np.nan
-df_deaths['value_mod'][df_deaths.type=='forecast'] = df_deaths['value'][df_deaths.type=='forecast']/300
-df_deaths['value_mod'][df_deaths.type=='fitted']   = df_deaths['value'][df_deaths.type=='fitted']
-
-sns.lineplot(data=df_deaths, x="date", y="value_mod")
+fig, ax = plt.subplots(1, 1, figsize=(15.5, 7.2))
+sns.lineplot(ax=ax, data=df_cases[df_cases.type=='fitted'], x="date", y="value_mod")
+data_p = data[data.type=='fitted']
+ax.scatter(data_p.index.values, data_p.smoothed_confirmed, edgecolor='black', facecolor='red')
+ax.set_ylim([0, 6000])
 plt.show()
+

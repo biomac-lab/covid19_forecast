@@ -5,8 +5,8 @@ clear all, clc
 data      = readtable('./bogota_cases.csv');
 
 pop       = 8181047;
-deaths    = data.confirmed;
-incidence = data.death;
+deaths    = data.death; 
+incidence = data.confirmed;
 
 num_times = size(deaths,1);
 
@@ -37,7 +37,7 @@ OEV=zeros(num_loc,num_times);
 for l=1:num_loc
     for t=1:num_times
         obs_ave=mean(obs_truth(l,max(1,t-6):t));
-        OEV(l,t)=max(1e-4,obs_ave^2/100);
+        OEV(l,t)=max(5,obs_ave^2/20);
     end
 end
 
@@ -56,9 +56,9 @@ pop0 = double(pop)*ones(1,num_ens);
 
 [x,paramax,paramin]=initialize_SEIHR_deaths(pop0, num_ens, 0, 1:size(pop,1)); %get parameter range
 
-num_var=size(x,1);%number of state variables
+num_var=size(x,1); % number of state variables
 %IF setting
-Iter=400; % number of iterations
+Iter=300; % number of iterations
 
 num_para=size(paramax,1); % number of parameters
 theta=zeros(num_para,Iter+1); % mean parameters at each iteration
@@ -248,11 +248,17 @@ for n=1:Iter
     theta(:,n+1) = mean(temp,2);  %average over time
 
 
-    if mod(n,100)==0
-        save(strcat( '/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/',num2str(n),'_x_post') , 'x_post');
+    if mod(n,50)==0 || n==10
         para_post_mean = mean(para_post(:,:,:,1:n), 4);
+
+        save(strcat( '/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/',num2str(n),'_x_post') , 'x_post');
         save(strcat( '/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/',num2str(n),'_para_post_mean') , 'para_post_mean');
+
+        save(strcat( '/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/',num2str(n),'_x_post') , 'x_post');
+        save(strcat( '/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/',num2str(n),'_para_post_mean') , 'para_post_mean');
+
         
+        figure
         obs_fitted = obs_temp(1,:,:);
         obs_fitted =  mean((obs_fitted),2);
 
