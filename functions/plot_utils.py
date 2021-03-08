@@ -29,7 +29,10 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
     axes[0].scatter(df_data_fitted.index.values, df_data_fitted[col_data], facecolor='black', alpha=0.6, edgecolor='black', s=30)
     (y1_l, y2_l) = axes[0].get_ylim()
 
-    axes[0].fill_between(df_forecast.index.values, df_forecast[col_down], df_forecast[col_up], color=color, alpha=0.6, label='4 week forecast')
+    axes[0].fill_between(df_forecast.index.values, df_forecast[col_down], df_forecast[col_up], color=color, alpha=0.6, label='95% CI')
+    axes[0].fill_between(df_forecast.index.values, df_forecast['low_80'], df_forecast['high_80'], color=color, alpha=0.4, label='80% CI')
+    axes[0].fill_between(df_forecast.index.values, df_forecast['low_50'], df_forecast['high_50'], color=color, alpha=0.4, label='50% CI')
+
     axes[0].plot(df_forecast.index.values, df_forecast[col_point], color=color, alpha=0.4, label='Forecast - Median')
     axes[0].scatter(df_forecast.index.values, df_forecast[col_point], edgecolor='k', facecolor='white', s=10)
     axes[0].tick_params(axis='both', labelsize=15)
