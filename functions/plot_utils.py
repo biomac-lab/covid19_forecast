@@ -39,7 +39,10 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
 
     axes[1].fill_between(df_estimate.iloc[-10:].index.values, df_estimate.iloc[-10:][col_up], df_estimate.iloc[-10:][col_down], color='gray', alpha=0.4)
     axes[1].plot(df_estimate.iloc[-10:].index.values, df_estimate.iloc[-10:][col_point], color='black', alpha=0.4)
-    axes[1].fill_between(df_forecast.index.values, df_forecast[col_down], df_forecast[col_up], color=color, alpha=0.6)
+    axes[1].fill_between(df_forecast.index.values, df_forecast[col_down], df_forecast[col_up], color=color, alpha=0.2, label='90% CI')
+    axes[1].fill_between(df_forecast.index.values, df_forecast['low_80'], df_forecast['high_80'], color=color, alpha=0.4, label='80% CI')
+    axes[1].fill_between(df_forecast.index.values, df_forecast['low_50'], df_forecast['high_50'], color=color, alpha=0.6, label='50% CI')
+
     axes[1].plot(df_forecast.index.values, df_forecast[col_point], color='black', alpha=0.4)
     axes[1].scatter(df_estimate.iloc[-10:].index.values, df_data_fitted.iloc[-10:][col_data], facecolor='black', alpha=0.6, edgecolor='black', s=50)
     axes[1].scatter(df_data_preliminary.index.values, df_data_preliminary[col_data], edgecolor='k', facecolor='red', s=50, label='Preliminary data')
