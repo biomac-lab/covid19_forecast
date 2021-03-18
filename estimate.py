@@ -41,7 +41,6 @@ print("**** **** Last day uploaded {}".format(pd.to_datetime(data.index.values[-
 
 if drop_last_weeks:
     print("**** **** *** Droping last 2wk")
-    print(sys.argv)
     data = data.iloc[:-14]
 
 model = SEIRD(
