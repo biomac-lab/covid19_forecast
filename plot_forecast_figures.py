@@ -41,6 +41,7 @@ data = prepare_cases(data, col='death')
 
 data['type']            = 'fitted'
 if drop_last_weeks:
+    print("*** Droping last 2wk ***")
     data.iloc[-14:]['type'] = 'preliminary'
 
 
