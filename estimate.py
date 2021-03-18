@@ -1,4 +1,5 @@
-from functions.adjust_cases_functions import prepare_cases
+from functions.adjust_cases_functions import prepare_cases 
+from functions.general_utils import  get_bool
 from models.seird_model import SEIRD
 
 import matplotlib.pyplot as plt
@@ -17,7 +18,7 @@ if len(sys.argv) < 2:
 else:
     poly_run  = int(sys.argv[1])
     name_dir  = str(sys.argv[2])
-    drop_last_weeks = bool(sys.argv[3])
+    drop_last_weeks = get_bool(sys.argv[3])
     print("**** Running inference and forecast for {}".format(name_dir))
 
 data_dir            = config.get_property('data_dir_covid')
@@ -39,6 +40,8 @@ data  = data.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_di
 print("**** **** Last day uploaded {}".format(pd.to_datetime(data.index.values[-1]).strftime('%Y-%b-%d')))
 
 if drop_last_weeks:
+    print("**** **** *** Droping last 2wk")
+    print(sys.argv)
     data = data.iloc[:-14]
 
 model = SEIRD(
