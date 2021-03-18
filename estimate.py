@@ -17,6 +17,7 @@ if len(sys.argv) < 2:
 else:
     poly_run  = int(sys.argv[1])
     name_dir  = str(sys.argv[2])
+    drop_last_weeks = bool(sys.argv[3])
     print("**** Running inference and forecast for {}".format(name_dir))
 
 data_dir            = config.get_property('data_dir_covid')
@@ -37,7 +38,8 @@ data  = data.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_di
 
 print("**** **** Last day uploaded {}".format(pd.to_datetime(data.index.values[-1]).strftime('%Y-%b-%d')))
 
-data = data.iloc[:-14]
+if drop_last_weeks:
+    data = data.iloc[:-14]
 
 model = SEIRD(
     confirmed = data['confirmed'].cumsum(),
@@ -72,11 +74,6 @@ def trim(d, fields):
     if d is not None:
         d = {k : v for k, v in d.items() if k in fields}
     return d
-
-#np.savez_compressed(os.path.join(path_to_save, 'samples.npz'),
-#                        mcmc_samples = trim(samples, save_fields),
-#                        post_pred_samples = trim(post_pred_samples, save_fields),
-#                        forecast_samples = trim(forecast_samples, save_fields))
 
 np.savez_compressed(os.path.join(path_to_save, 'samples.npz'),
                         mcmc_samples = samples,

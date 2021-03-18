@@ -16,6 +16,7 @@ if len(sys.argv) < 2:
 else:
     poly_run  = int(sys.argv[1])
     name_dir  = str(sys.argv[2])
+    drop_last_weeks = bool(sys.argv[3])
 
 def load_samples(filename):
 
@@ -40,12 +41,15 @@ data = data.resample('D').sum().fillna(0)[['num_cases','num_diseased']]
 data  = prepare_cases(data, col='num_cases', cutoff=0)    # .rename({'smoothed_num_cases':'num_cases'})
 data  = prepare_cases(data, col='num_diseased', cutoff=0) # .rename({'smoothed_num_cases':'num_cases'})
 
+polygons = pd.read_csv(os.path.join(agglomerated_folder, 'polygons.csv')).set_index('poly_id')
+polygons = polygons.loc[poly_run]
 
 data = data.rename(columns={'num_cases': 'confirmed', 'num_diseased':'death'})[['confirmed', 'death']]
 data = prepare_cases(data, col='confirmed')
 data = prepare_cases(data, col='death')
 
-data = data.iloc[:-14]
+if drop_last_weeks:
+    data = data.iloc[:-14]
 
 
 
@@ -59,7 +63,7 @@ model = SEIRD(
     confirmed = data['confirmed'].cumsum(),
     death     = data['death'].cumsum(),
     T         = len(data),
-    N         = 8181047,
+    N         = int(polygons["attr_population"]),
     samples   = mcmc_samples
     )
 

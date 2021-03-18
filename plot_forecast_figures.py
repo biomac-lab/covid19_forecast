@@ -20,6 +20,7 @@ if len(sys.argv) < 2:
 else:
     poly_run  = int(sys.argv[1])
     name_dir  = str(sys.argv[2])
+    drop_last_weeks = bool(sys.argv[3])
 
 data_dir            = config.get_property('data_dir_covid')
 geo_dir             = config.get_property('geo_dir')
@@ -39,7 +40,8 @@ data = prepare_cases(data, col='confirmed')
 data = prepare_cases(data, col='death')
 
 data['type']            = 'fitted'
-data.iloc[-14:]['type'] = 'preliminary'
+if drop_last_weeks:
+    data.iloc[-14:]['type'] = 'preliminary'
 
 
 T_future = 28
