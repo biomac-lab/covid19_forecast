@@ -1,8 +1,8 @@
 def get_bool(key):
     if key == 'True':
-        value = True
+        return True
     elif key=='False':
-        value = False # .get(key)
+        return False # .get(key)
     else:
         value = bool(key)
     return value
