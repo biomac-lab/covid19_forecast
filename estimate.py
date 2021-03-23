@@ -32,6 +32,7 @@ polygons = polygons.loc[poly_run]
 
 data  =  pd.read_csv(os.path.join(agglomerated_folder, 'cases.csv'), parse_dates=['date_time'],
                     dayfirst=True).set_index('poly_id').loc[poly_run].set_index('date_time')
+
 data  = data.resample('D').sum().fillna(0)[['num_cases','num_diseased']]
 data  = prepare_cases(data, col='num_cases', cutoff=0)    # .rename({'smoothed_num_cases':'num_cases'})
 data  = prepare_cases(data, col='num_diseased', cutoff=0) # .rename({'smoothed_num_cases':'num_cases'})
@@ -80,5 +81,4 @@ def trim(d, fields):
 np.savez_compressed(os.path.join(path_to_save, 'samples.npz'),
                         mcmc_samples = samples,
                         post_pred_samples = post_pred_samples,
-                        forecast_samples = forecast_samples)
-
+                        forecast_samples  = forecast_samples)
