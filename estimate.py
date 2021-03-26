@@ -44,6 +44,7 @@ if drop_last_weeks:
     print("**** **** *** Droping last 2wk")
     data = data.iloc[:-14]
 
+
 model = SEIRD(
     confirmed = data['confirmed'].cumsum(),
     death     = data['death'].cumsum(),
