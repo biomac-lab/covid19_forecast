@@ -37,6 +37,8 @@ uci['total_uci']   = uci["total_uci"].apply(lambda x: int(x.replace('.', '')))
 uci["date_time"]    =  pd.to_datetime(uci["date_time"], format='%d/%m/%Y')
 
 
+
+
 data_all = pd.merge(data, hosp, on='date_time', how='outer').set_index('date_time')
 data_all = pd.merge(data_all, uci, on='date_time', how='outer').set_index('date_time')
 data_all_raw = data_all.copy()
@@ -60,13 +62,11 @@ data_all["death"].plot(ax=axes[0], color='red', linestyle='--', label='Deaths')
 data_all["uci"].plot(ax=axes[0], color='green', linestyle='--', label='UCIs')
 
 data_all["confirmed"].plot(ax=axes[1], color='k', linestyle='-', label='Cases')
-ax_tw = axes[1].twinx()
 data_all["hospitalized"].plot(ax=axes[1], color='blue', linestyle='--', label='Hosp')
 data_all["uci"].plot(ax=axes[1], color='green', linestyle='--', label='UCIs')
 
 axes[0].legend()
 axes[1].legend()
-ax_tw.legend()
 plt.show()
 
 data_fit = data_all[data_all.type=='fitted']

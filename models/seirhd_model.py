@@ -354,21 +354,35 @@ class SEIRHDBase(Model):
 class SEIRHDModel(SEIRModel):
 
     @classmethod
-    def dx_dt(cls, x, t, beta, sigma, gamma, hosp_prob, death_prob, death_rate):
+    def dx_dt(cls, x, t, beta, sigma, gamma, hosp_prob, death_prob, death_rate, hosp_rate):
         """
         SEIRD equations
         """
         S, E, I, R, H, U, D, C = x
         N = S + E + I + R + H + D
 
-        sdot = - beta * S * I / N
-        edot = beta * S * I / N - sigma * E
-        idot = sigma * E - gamma * (1 - hosp_prob) * I - gamma * hosp_prob * I
-        hdot = hosp_prob * gamma * I - death_rate * death_prob * H - death_rate * (1 - death_prob) * H
-        rdot = death_rate * (1-death_prob) * H + gamma * (1 - hosp_prob) * I
-        udot = hosp_prob * gamma * I       # Cum hosp
-        ddot = death_rate * death_prob * H # Cum deaths
-        cdot = beta * S * I / N            # Cum incidence
+        # sus -> exp
+        s2e = beta * S * I / N
+        # exp -> inf
+        e2i = sigma * E
+        # inf -> rec
+        i2r = gamma * (1 - hosp_prob) * I
+        # inf -> hosp
+        i2h = hosp_rate * hosp_prob * I
+        # hosp -> death
+        h2d = death_rate * death_prob * H
+        # hosp -> rec
+        h2r = death_rate * (1 - death_prob) * H
+
+
+        sdot = - s2e
+        edot =  s2e - e2i
+        idot = e2i - i2r - i2h
+        hdot = i2h - h2d - h2r
+        rdot = h2r + i2r
+        udot = i2h       # Cum hosp
+        ddot = h2d       # Cum deaths
+        cdot = s2e       # Cum incidence
 
         return np.stack([sdot, edot, idot, rdot, hdot, udot, ddot, cdot])
 
@@ -419,8 +433,8 @@ class SEIRHD(SEIRHDBase):
                  N = 1e5,
                  T_future = 0,
                  E_duration_est = 4.0,
-                 I_duration_est = 2.0,
-                 H_duration_est = 12.0,
+                 I_duration_est = 3.0,
+                 H_duration_est = 15.0,
                  R0_est = 3.0,
                  beta_shape = 1.,
                  sigma_shape = 100.,
@@ -496,8 +510,8 @@ class SEIRHD(SEIRHDBase):
                                               (1-.9) * 100))
 
         det_prob_h = numpyro.sample("det_prob_h",
-                                    dist.Beta(.9 * 100,
-                                              (1-.9) * 100))
+                                    dist.Beta(.95 * 100,
+                                              (1-.95) * 100))
 
         death_prob = numpyro.sample("death_prob",
                                     dist.Beta(death_prob * 100, (1-death_prob) * 100))
@@ -508,7 +522,9 @@ class SEIRHD(SEIRHDBase):
 
         death_rate = numpyro.sample("death_rate",
                                     dist.Gamma(100, 100 * H_duration_est))
-                                    # dist.Gamma(100, 100 * H_duration_est))
+
+        hosp_rate = numpyro.sample("hosp_rate",
+                                    dist.Gamma(100, 100 * H_duration_est))
 
         if drift_scale is not None:
             drift = numpyro.sample("drift", dist.Normal(loc=0., scale=drift_scale))
