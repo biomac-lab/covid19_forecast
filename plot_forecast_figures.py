@@ -73,5 +73,5 @@ im2 = Image.open('figures/mcmc/cases.png').convert('RGB')
 
 im_list = [im2]
 
-pdf1_filename = "./report_{}.pdf".format(pd.to_datetime(data[data.type=='fitted'].index.values[-1]).strftime('%Y-%m-%d'))
+pdf1_filename = "./report_{}_{}.pdf".format(name_dir, pd.to_datetime(data[data.type=='fitted'].index.values[-1]).strftime('%Y-%m-%d'))
 im1.save(pdf1_filename, "PDF" ,resolution=100.0, save_all=True, append_images=im_list)
