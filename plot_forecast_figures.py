@@ -60,8 +60,11 @@ df_cases['date'] = pd.to_datetime(df_cases['date'])
 df_cases = df_cases.set_index('date')
 df_cases = df_cases.iloc[:len(data)+T_future]
 
-plot_fit(df_deaths, data, col_data='smoothed_death',   y_lim_up = 20, y_label='Deaths', color='indianred', path_to_save='figures/mcmc/deaths.png')
-plot_fit(df_cases, data, col_data='smoothed_confirmed', y_lim_up = 1000,  y_label='Cases', color='darksalmon', path_to_save='figures/mcmc/cases.png')
+d_max = df_deaths.max() + 10**int(np.log10(df_deaths.max()))
+c_max = df_cases.max()  + 10**int(np.log10(df_cases.max()))
+
+plot_fit(df_deaths, data, col_data='smoothed_death',   y_lim_up = d_max, y_label='Deaths', color='indianred', path_to_save='figures/mcmc/deaths.png')
+plot_fit(df_cases, data, col_data='smoothed_confirmed', y_lim_up = c_max,  y_label='Cases', color='darksalmon', path_to_save='figures/mcmc/cases.png')
 
 os.popen('cp figures/mcmc/deaths.png {}'.format(os.path.join(path_to_save, 'deaths.png')))
 os.popen('cp figures/mcmc/cases.png {}'.format(os.path.join(path_to_save, 'cases.png')))
