@@ -149,7 +149,8 @@ for n=1:Iter
         end
 
         obs_temp_H(:,:,t) = obs_cnt_H; % No delay to deaths
-        obs_ens   = obs_temp(:,:,t);%observation at t
+        %obs_ens   = obs_temp(:,:,t);%observation at t
+        obs_ens   = obs_cnt; % erase this for include delay
         obs_ens_H = obs_temp_H(:,:,t);%observation at t
 
         x_prior(:,:,t)=x;%set prior
