@@ -61,14 +61,14 @@ path_to_checkpoints = os.path.join(results_dir, name_dir, 'checkpoints_agg')
 import scipy.io as sio
 
 x_post_forecast = sio.loadmat(os.path.join( path_to_checkpoints, 'forecast_xstates_bog'))['x_forecast']
-para_post       = sio.loadmat(os.path.join( path_to_checkpoints, '400_para_post_mean.mat'))['para_post_mean']
-x_post          = sio.loadmat(os.path.join( path_to_checkpoints, '400_x_post'))['x_post']
+para_post       = sio.loadmat(os.path.join( path_to_checkpoints, '300_para_post_mean.mat'))['para_post_mean']
+x_post          = sio.loadmat(os.path.join( path_to_checkpoints, '300_x_post'))['x_post']
 
 
 path_to_save = os.path.join(results_dir, 'weekly_forecast' , name_dir,
                             pd.to_datetime(data[data.type=='fitted'].index.values[-1]).strftime('%Y-%m-%d'))
 
-pop =507324
+pop = 8181047
 
 parameters_csv =  pd.DataFrame(np.mean(para_post[[0,1,-1],:,:].T, axis=1), columns=['beta_i','beta_a', 'ifr'], index=pd.date_range(start=pd.to_datetime(data[data.type=='fitted'].index.values[0]).strftime('%Y-%m-%d'), periods=para_post.shape[-1]))
 parameters_csv.index.name = 'date'

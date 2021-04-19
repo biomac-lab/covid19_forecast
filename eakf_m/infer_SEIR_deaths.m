@@ -248,7 +248,7 @@ for n=1:Iter
     theta(:,n+1) = mean(temp,2);  %average over time
 
 
-    if mod(n,50)==0 || n==10
+    if mod(n,100)==0 || n==10
         para_post_mean = mean(para_post(:,:,:,1:n), 4);
 
         save(strcat( '/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/',num2str(n),'_x_post') , 'x_post');

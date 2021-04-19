@@ -82,10 +82,10 @@ num_forecast = 90;
 num_var = size(x,1);
 
 
-x_post  = load(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', '100_x_post'));
+x_post  = load(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', '300_x_post'));
 x_post  = x_post.x_post;
 
-para_post  = load(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', '100_para_post_mean'));
+para_post  = load(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', '300_para_post_mean'));
 para_post  = para_post.para_post_mean;
 theta      = squeeze(mean(para_post,3));
 
