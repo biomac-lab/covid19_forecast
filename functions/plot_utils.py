@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 from matplotlib import ticker
 
 import os
+
 def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', col_data='smoothed_death', col_up='high_95', col_down='low_95', col_point='median', ax=None,   forecast=True, path_to_save=None):
     """ df_fit with columns:
             'mean', 'median', 'std', 'low_95', 'high_95', 'low_80', 'high_80', 'low_50', 'high_50', 'type'
