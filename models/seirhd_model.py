@@ -722,6 +722,6 @@ class SEIRHD(SEIRHDBase):
 
         h0 = np.zeros(dh.shape[0])
         if args.get('forecast'):
-            h0 = self.z(samples, forecast=False)[:,-1]
+            h0 = self.h(samples, forecast=False)[:,-1]
 
         return h0[:,None] + onp.cumsum(dh, axis=1)
