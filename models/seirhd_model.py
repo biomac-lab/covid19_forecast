@@ -332,7 +332,7 @@ class SEIRHDBase(Model):
     def dh(self, samples, noise_scale=0.4, **args):
         '''Daily hospitalizations with observation noise'''
         dh_mean = self.dh_mean(samples, **args)
-        dh = dist.Normal(dh_mean, noise_scale * dh_mean).sample(PRNGKey(10))
+        dh = dist.Normal(dh_mean, noise_scale * dh_mean).sample(PRNGKey(11))
         return dh
 
     def dy_mean(self, samples, **args):
@@ -348,7 +348,7 @@ class SEIRHDBase(Model):
     def dy(self, samples, noise_scale=0.4, **args):
         '''Daily confirmed cases with observation noise'''
         dy_mean = self.dy_mean(samples, **args)
-        dy = dist.Normal(dy_mean, noise_scale * dy_mean).sample(PRNGKey(11))
+        dy = dist.Normal(dy_mean, noise_scale * dy_mean).sample(PRNGKey(12))
         return dy
 
 class SEIRHDModel(SEIRModel):
@@ -374,9 +374,8 @@ class SEIRHDModel(SEIRModel):
         # hosp -> rec
         h2r = death_rate * (1 - death_prob) * H
 
-
         sdot = - s2e
-        edot =  s2e - e2i
+        edot = s2e - e2i
         idot = e2i - i2r - i2h
         hdot = i2h - h2d - h2r
         rdot = h2r + i2r
@@ -444,8 +443,8 @@ class SEIRHD(SEIRHDBase):
                  confirmed_dispersion=0.3,
                  death_dispersion=0.3,
                  hosp_prob  = 0.2,
-                 death_prob = 0.01,
-                 hosp_dispersion=0.7,
+                 death_prob = 0.03,
+                 hosp_dispersion=0.3,
                  rw_scale = 2e-1,
                  det_noise_scale=0.15,
                  forecast_rw_scale = 0.,
@@ -524,7 +523,7 @@ class SEIRHD(SEIRHDBase):
                                     dist.Gamma(100, 100 * H_duration_est))
 
         hosp_rate = numpyro.sample("hosp_rate",
-                                    dist.Gamma(100, 100 * H_duration_est))
+                                    dist.Gamma(100, 100 * H_duration_est+7))
 
         if drift_scale is not None:
             drift = numpyro.sample("drift", dist.Normal(loc=0., scale=drift_scale))
@@ -554,7 +553,6 @@ class SEIRHD(SEIRHDBase):
             hospitalized0 = hospitalized[0]
             hospitalized  = clean_daily_obs(onp.diff(hospitalized))
 
-
         # First observation
         with numpyro.handlers.scale(scale=0.5):
             y0 = observe_nb2("dy0", x0[7], det_prob0, confirmed_dispersion, obs=confirmed0)
@@ -581,6 +579,7 @@ class SEIRHD(SEIRHDBase):
                   hosp_prob,
                   death_prob,
                   death_rate,
+                  hosp_rate,
                   det_prob_d,
                   det_prob_h)
 
@@ -611,6 +610,7 @@ class SEIRHD(SEIRHDBase):
                       hosp_prob,
                       death_prob,
                       death_rate,
+                      hosp_rate,
                       det_prob_d,
                       det_prob_h)
 
@@ -640,6 +640,7 @@ class SEIRHD(SEIRHDBase):
         hosp_prob, \
         death_prob, \
         death_rate, \
+        hosp_rate,  \
         det_prob_d, \
         det_prob_h = params
 
@@ -656,7 +657,7 @@ class SEIRHD(SEIRHDBase):
                                                      num_steps=T-1))
 
         # Run ODE
-        x = SEIRHDModel.run(T, x0, (beta, sigma, gamma, hosp_prob, death_prob, death_rate))
+        x = SEIRHDModel.run(T, x0, (beta, sigma, gamma, hosp_prob, death_prob, death_rate, hosp_rate))
         numpyro.deterministic("x" + suffix, x[1:])
         x_diff = np.diff(x, axis=0)
 
@@ -682,7 +683,7 @@ class SEIRHD(SEIRHDBase):
     dh = getter('dh')
 
     def y0(self, **args):
-        return self.z0(**args)
+        return self.y0(**args)
 
 
     def y(self, samples, **args):

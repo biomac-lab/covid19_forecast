@@ -7,7 +7,7 @@ from matplotlib import ticker
 
 import os
 
-def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', col_data='smoothed_death', col_up='high_95', col_down='low_95', col_point='median', ax=None,   forecast=True, path_to_save=None):
+def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', col_data='smoothed_death', col_up='high_95', col_down='low_95', col_point='median', ax=None, sharey=True,   forecast=True, path_to_save=None):
     """ df_fit with columns:
             'mean', 'median', 'std', 'low_95', 'high_95', 'low_80', 'high_80', 'low_50', 'high_50', 'type'
             type in ['estimate', 'forecast']
@@ -17,13 +17,13 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
                     type in ['fitted', 'preliminary']
     """
 
-    df_estimate = df_fit.copy(); df_estimate = df_estimate[df_estimate.type=='estimate']
-    df_forecast = df_fit.copy(); df_forecast = df_forecast[df_forecast.type=='forecast']
+    df_estimate = df_fit.copy(); df_estimate = df_estimate[ df_estimate.type=='estimate' ]
+    df_forecast = df_fit.copy(); df_forecast = df_forecast[ df_forecast.type=='forecast' ]
 
     df_data_fitted = df_data.copy(); df_data_fitted = df_data_fitted[df_data_fitted.type=='fitted']
     df_data_preliminary = df_data.copy(); df_data_preliminary = df_data_preliminary[df_data_preliminary.type=='preliminary']
 
-    fig, axes = plt.subplots(1, 2, figsize=(20, 7), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(20, 7), sharey=sharey)
     axes[0].fill_between(df_estimate.index.values, df_estimate[col_down], df_estimate[col_up], color='gray', alpha=0.4, label='95 CI - Nowcast')
     axes[0].plot(df_estimate.index.values, df_estimate[col_point], color='black', alpha=0.4, label='Median - Nowcast')
 
@@ -72,7 +72,8 @@ def plot_fit(df_fit, df_data, y_label='Deaths', y_lim_up = 200, color='blue', co
 
     axes[1].xaxis.set_major_locator(mdates.WeekdayLocator())
     axes[1].xaxis.set_major_locator(mdates.MonthLocator())
-    axes[1].tick_params(which='both', axis='x', labelrotation=90, labelsize=15)
+    axes[1].tick_params(which='both', axis='both', labelrotation=90, labelsize=15)
+
     axes[1].grid(which='both', axis='x', c='k', alpha=.1, zorder=-2)
     axes[0].grid(which='major', axis='x', c='k', alpha=.1, zorder=-2)
     plt.tight_layout()
