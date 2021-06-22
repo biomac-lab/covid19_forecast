@@ -7,7 +7,7 @@ thetalow=1;thetaup=1.75; %movement factor
 Zlow=3;Zup=4;  %latency period
 alphalow=0.02;alphaup=1.0; %reporting rate
 Dlow=3; Dup=4;  %infectious period
-Llow=7; Lup=14; %hospitalization period
+Llow=8; Lup=14; %hospitalization period
 IFRlow=0.1/100; IFRup=2/100; %hospitalization period
 
 xmin=[betalow;mulow;thetalow;Zlow;alphalow;Dlow;Llow;IFRlow];
@@ -27,9 +27,9 @@ for i=1:num_loc
     %Iu
     x((i-1)*num_state_var+4,x((i-1)*num_state_var+4,:)<0)=0;
     %Id
-    x((i-1)*num_state_var+4,x((i-1)*num_state_var+4,:)<0)=0;
+    x((i-1)*num_state_var+4,x((i-1)*num_state_var+5,:)<0)=0;
     %obs cases
-    x((i-1)*num_state_var+6,x((i-1)*num_state_var+5,:)<0)=0;
+    x((i-1)*num_state_var+6,x((i-1)*num_state_var+6,:)<0)=0;
     %obs hospitalizations
     x((i-1)*num_state_var+7,x((i-1)*num_state_var+7,:)<0)=0;
 end

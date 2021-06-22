@@ -1,3 +1,5 @@
+# https://gather.town/app/VKRiIFXslfzfeqog/EEID_2021
+
 from functions.adjust_cases_functions import prepare_cases
 from functions.general_utils import  get_bool
 from models.seird_model import SEIRD

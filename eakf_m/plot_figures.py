@@ -60,8 +60,8 @@ path_to_checkpoints = os.path.join(results_dir, name_dir, 'checkpoints_agg')
 import scipy.io as sio
 
 x_post_forecast = sio.loadmat(os.path.join( path_to_checkpoints, 'forecast_xstates_bog'))['x_forecast']
-para_post       = sio.loadmat(os.path.join( path_to_checkpoints, '200_para_post_mean.mat'))['para_post_mean']
-x_post          = sio.loadmat(os.path.join( path_to_checkpoints, '200_x_post'))['x_post']
+para_post       = sio.loadmat(os.path.join( path_to_checkpoints, '100_para_post_mean.mat'))['para_post_mean']
+x_post          = sio.loadmat(os.path.join( path_to_checkpoints, '100_x_post'))['x_post']
 
 path_to_save = os.path.join(results_dir, 'weekly_forecast' , name_dir,
                             pd.to_datetime(data[data.type=='fitted'].index.values[-1]).strftime('%Y-%m-%d'))
@@ -79,8 +79,8 @@ variables_csv = variables_csv[['S', 'E','A', 'I', 'Id', 'deaths','R']]
 variables_csv['population'] = pop
 
 variables_csv.to_csv(os.path.join(path_to_save, 'variables.csv'))
-variables_csv = variables_csv/pop*100
-variables_csv.to_csv(os.path.join(path_to_save, 'variables_percentage.csv'))
+#variables_csv = variables_csv/pop*100
+#variables_csv.to_csv(os.path.join(path_to_save, 'variables_percentage.csv'))
 
 
 recovered = np.squeeze(sio.loadmat(os.path.join(path_to_checkpoints, 'recovered'))['recovered_all'])
@@ -138,3 +138,69 @@ ax.set_ylabel(r'Recovered Fraction $R(t)/N$', fontsize=15)
 ax.legend(loc='upper left')
 fig.savefig(os.path.join(path_to_save, 'parameters','recovered.png'),  dpi=300,  bbox_inches='tight', transparent=False)
 plt.close()
+
+
+
+detection_rate = para_post[4,:,:]
+detection_rate_df = create_df_response(detection_rate*100, detection_rate.shape[-1], date_init =pd.to_datetime(data[data.type=='fitted'].index.values[0]).strftime('%Y-%m-%d'))
+
+I_df = create_df_response(x_post[2,:,:], x_post.shape[-1], date_init =pd.to_datetime(data[data.type=='fitted'].index.values[0]).strftime('%Y-%m-%d'))
+A_df = create_df_response(x_post[3,:,:], x_post.shape[-1], date_init =pd.to_datetime(data[data.type=='fitted'].index.values[0]).strftime('%Y-%m-%d'))
+Id_df = create_df_response(x_post[4,:,:], x_post.shape[-1], date_init =pd.to_datetime(data[data.type=='fitted'].index.values[0]).strftime('%Y-%m-%d'))
+
+fig, ax = plt.subplots(1, 1, figsize=(12.5, 7))
+ax.plot(detection_rate_df.index.values, detection_rate_df["mean"], color='teal', alpha=0.4)
+ax.fill_between(detection_rate_df.index.values, detection_rate_df["low_975"], detection_rate_df["high_975"], color='teal', alpha=0.6, label='95 % CI')
+
+ax.xaxis.set_major_locator(mdates.MonthLocator())
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+ax.xaxis.set_minor_locator(mdates.DayLocator())
+ax.xaxis.set_major_locator(mdates.WeekdayLocator())
+ax.xaxis.set_major_locator(mdates.MonthLocator())
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['left'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.grid(which='major', axis='y', c='k', alpha=.1, zorder=-2)
+ax.grid(which='major', axis='x', c='k', alpha=.1, zorder=-2)
+ax.tick_params(axis='both', labelsize=15)
+ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f} %"))
+ax.set_ylabel(r'Ascertainment Rates', fontsize=15)
+ax.legend(loc='upper left')
+#fig.savefig(os.path.join(path_to_save, 'parameters','detection_rate.png'),  dpi=300,  bbox_inches='tight', transparent=False)
+plt.show()
+
+
+data["infected_mean"]     = data["smoothed_confirmed"]*(1+(1+detection_rate_df["mean"]/100)     )
+data["infected_median"]   = data["smoothed_confirmed"]*(1+(1+detection_rate_df["median"]/100)   )
+data["infected_low_975"]  = data["smoothed_confirmed"]*(1+(1+detection_rate_df["low_975"]/100)  )
+data["infected_high_975"] = data["smoothed_confirmed"]*(1+(1+detection_rate_df["high_975"]/100) )
+data["infected_low_90"]   = data["smoothed_confirmed"]*(1+(1+detection_rate_df["low_90"]/100)  )
+data["infected_high_90"]  = data["smoothed_confirmed"]*(1+(1+detection_rate_df["high_90"]/100) )
+
+
+fig, ax = plt.subplots(1, 1, figsize=(12.5, 7))
+ax.plot(variables_csv.index.values, (variables_csv["A"]+variables_csv["I"]+variables_csv["Id"])/10, color="red", label="Total infected")
+
+
+#ax.plot(data.index.values, data["infected_mean"], color="red", label="Total infected")
+
+ax.plot(data.index.values, data["smoothed_confirmed"], color='blue', label="Reported cases")
+
+ax.xaxis.set_major_locator(mdates.MonthLocator())
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+ax.xaxis.set_minor_locator(mdates.DayLocator())
+ax.xaxis.set_major_locator(mdates.WeekdayLocator())
+ax.xaxis.set_major_locator(mdates.MonthLocator())
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['left'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.grid(which='major', axis='y', c='k', alpha=.1, zorder=-2)
+ax.grid(which='major', axis='x', c='k', alpha=.1, zorder=-2)
+ax.tick_params(axis='both', labelsize=15)
+#ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f} %"))
+ax.set_ylabel(r'Num. Individuals', fontsize=15)
+ax.legend(loc='upper left')
+#fig.savefig(os.path.join(path_to_save, 'parameters','detection_rate.png'),  dpi=300,  bbox_inches='tight', transparent=False)
+plt.show()

@@ -443,7 +443,7 @@ class SEIRHD(SEIRHDBase):
                  confirmed_dispersion=0.3,
                  death_dispersion=0.3,
                  hosp_prob  = 0.2,
-                 death_prob = 0.03,
+                 death_prob = 0.02,
                  hosp_dispersion=0.3,
                  rw_scale = 2e-1,
                  det_noise_scale=0.15,
@@ -505,12 +505,12 @@ class SEIRHD(SEIRHDBase):
                                             (1-det_prob_est) * det_prob_conc))
 
         det_prob_d = numpyro.sample("det_prob_d",
-                                    dist.Beta(.9 * 100,
-                                              (1-.9) * 100))
+                                    dist.Beta(.8 * 100,
+                                              (1-.8) * 100))
 
         det_prob_h = numpyro.sample("det_prob_h",
-                                    dist.Beta(.95 * 100,
-                                              (1-.95) * 100))
+                                    dist.Beta(.85 * 100,
+                                              (1-.85) * 100))
 
         death_prob = numpyro.sample("death_prob",
                                     dist.Beta(death_prob * 100, (1-death_prob) * 100))

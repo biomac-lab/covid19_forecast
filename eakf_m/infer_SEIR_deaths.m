@@ -5,11 +5,10 @@ clear all, clc
 data      = readtable('./bogota_cases.csv');
 
 pop       = 8181047;
-deaths    = data.death; 
-incidence = data.confirmed;
+deaths    = data.smoothed_death; 
+incidence = data.smoothed_confirmed;
 
 num_times = size(deaths,1);
-
 num_loc   = 1;
 
 Td   = 9;%average reporting delay
@@ -50,11 +49,10 @@ for l=1:num_loc
     end
 end
 
-
 num_ens = 300;%number of ensemble
 pop0 = double(pop)*ones(1,num_ens);
 
-[x,paramax,paramin]=initialize_SEIHR_deaths(pop0, num_ens, 0, 1:size(pop,1)); %get parameter range
+[x,paramax,paramin] = initialize_SEIHR_deaths(pop0, num_ens, 0, 1:size(pop,1)); %get parameter range
 
 num_var=size(x,1); % number of state variables
 %IF setting

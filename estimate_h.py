@@ -52,22 +52,21 @@ data_all  = prepare_cases(data_all, col='num_cases', cutoff=0)
 data_all  = prepare_cases(data_all, col='num_diseased', cutoff=0)
 data_all = data_all.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_diseased':'death'})[['confirmed', 'death', 'hospitalized', 'uci']]
 data_all['type'] = 'fitted'
-data_all['type'].iloc[-14:] = 'preliminary'
 
 #data_all = data_all.iloc[:100]
 
 
-fig, axes = plt.subplots(2,1)
-data_all["death"].plot(ax=axes[0], color='red', linestyle='--', label='Deaths')
-data_all["uci"].plot(ax=axes[0], color='green', linestyle='--', label='UCIs')
+#fig, axes = plt.subplots(2,1)
+#data_all["death"].plot(ax=axes[0], color='red', linestyle='--', label='Deaths')
+#data_all["uci"].plot(ax=axes[0], color='green', linestyle='--', label='UCIs')
 
-data_all["confirmed"].plot(ax=axes[1], color='k', linestyle='-', label='Cases')
-data_all["hospitalized"].plot(ax=axes[1], color='blue', linestyle='--', label='Hosp')
-data_all["uci"].plot(ax=axes[1], color='green', linestyle='--', label='UCIs')
+#data_all["confirmed"].plot(ax=axes[1], color='k', linestyle='-', label='Cases')
+#data_all["hospitalized"].plot(ax=axes[1], color='blue', linestyle='--', label='Hosp')
+#data_all["uci"].plot(ax=axes[1], color='green', linestyle='--', label='UCIs')
 
-axes[0].legend()
-axes[1].legend()
-plt.show()
+#axes[0].legend()
+#axes[1].legend()
+#plt.show()
 
 data_fit = data_all[data_all.type=='fitted']
 model = SEIRHD(
@@ -112,13 +111,12 @@ df_cases  = create_df_response(cases_fitted, time=len(data_fit), date_init ='202
 beta_samples     = np.concatenate((np.expand_dims(samples["beta0"],-1), samples["beta"] ), axis=1)
 df_contact_rate  = create_df_response(beta_samples , time=beta_samples.shape[-1], date_init ='2020-03-06',  forecast_horizon=28, use_future=False)
 
-
 from functions.plot_utils import plot_fit
 from functions.plot_utils import *
 
-plot_fit(df_deaths, data_all, col_data='death',   y_lim_up = 300, y_label='Deaths', color='indianred', path_to_save='figures/mcmc_2/deaths.png')
-plot_fit(df_cases,  data_all, col_data='confirmed',  y_lim_up = 7000,  y_label='Cases', color='darksalmon', path_to_save='figures/mcmc_2/cases.png')
-plot_fit(df_hosp, data_all,   col_data='uci',   y_lim_up = 5000, y_label='Hospitalization', color='blue', path_to_save='figures/mcmc_2/hosp.png')
+plot_fit(df_deaths, data_all, col_data='death',   y_lim_up = 300, y_label='Deaths', color='indianred', sharey=False, path_to_save='figures/mcmc_2/deaths.png')
+plot_fit(df_cases,  data_all, col_data='confirmed',  y_lim_up = 8000,  y_label='Cases', color='darksalmon', sharey=False, path_to_save='figures/mcmc_2/cases.png')
+plot_fit(df_hosp, data_all,   col_data='uci',   y_lim_up = 5000, y_label='UCIs', color='blue', sharey=False, path_to_save='figures/mcmc_2/hosp.png')
 
 
 fig, ax = plt.subplots(1, 1, figsize=(15.5, 7))
@@ -145,19 +143,19 @@ ax.set_ylabel(r'$\beta(t)$ - Contact Rate', size=15)
 fig.savefig(os.path.join('figures', 'mcmc_2', 'contact_rate.png'), dpi=300, bbox_inches='tight', transparent=False)
 plt.close()
 
-save_fields=['beta0', 'beta', 'sigma', 'gamma', 'dy0', 'dy', 'mean_dy', 'mean_dy0',  'dy_future', 'mean_dy_future',
+save_fields=['beta0', 'beta', 'sigma', 'gamma',
+            'dy0', 'dy', 'mean_dy', 'mean_dy0',  'dy_future', 'mean_dy_future',
                 'dz0', 'dz', 'dz_future', 'mean_dz', 'mean_dz0', 'mean_dz_future',
-                'y0', 'y', 'y_future', 'z0', 'z', 'z_future' ]
+                'dh0', 'dh', 'dh_future', 'mean_dh', 'mean_dh0', 'mean_dh_future',
+                'y0', 'y', 'y_future',
+                'h0', 'h', 'h_future',
+                'z0', 'z', 'z_future' ]
 
 def trim(d, fields):
     if d is not None:
         d = {k : v for k, v in d.items() if k in fields}
     return d
 
-#np.savez_compressed(os.path.join(path_to_save, 'samples.npz'),
-#                        mcmc_samples = trim(samples, save_fields),
-#                        post_pred_samples = trim(post_pred_samples, save_fields),
-#                        forecast_samples = trim(forecast_samples, save_fields))
 
 np.savez_compressed(os.path.join(path_to_save, 'samples.npz'),
                         mcmc_samples = samples,
