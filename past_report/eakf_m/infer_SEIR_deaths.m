@@ -36,7 +36,7 @@ OEV=zeros(num_loc,num_times);
 for l=1:num_loc
     for t=1:num_times
         obs_ave=mean(obs_truth(l,max(1,t-6):t));
-        OEV(l,t)=max(5,obs_ave^2/20);
+        OEV(l,t)=max(20, 1+0.2*obs_ave^2);
     end
 end
 
@@ -45,7 +45,7 @@ OHEV=zeros(num_loc,num_times);
 for l=1:num_loc
     for t=1:num_times
         obs_ave=mean(obs_truth_hosp(l,max(1,t-6):t));
-        OHEV(l,t)=max(5,obs_ave^2/20);
+        OHEV(l,t)=max(20, 1+0.2*obs_ave^2);
     end
 end
 
@@ -66,7 +66,7 @@ alp=0.9;           %variance shrinking rate
 
 SIG=(paramax-paramin).^2/4;%initial covariance of parameters
 
-lambda=1.2;%inflation parameter to aviod divergence within each iteration
+lambda=1.1;%inflation parameter to aviod divergence within each iteration
 
 num_state_var = 7;
 % S,E,Is,Ia,obs,...,beta,mu,theta,Z,alpha,D
@@ -260,23 +260,34 @@ for n=1:Iter
         figure
         obs_fitted = obs_temp(1,:,:);
         obs_fitted =  mean((obs_fitted),2);
-
+        
+        Y_cases = quantile(obs_temp, [0.05, 0.95], 2);
+        
+        
         obs_fitted_h = obs_temp_H(1,:,:);
         obs_fitted_h =  mean((obs_fitted_h),2);
 
+        Y_deaths = quantile(obs_temp_H, [0.05, 0.95], 2);
+
         subplot(1,2,1)
         plot(1:num_times, squeeze(obs_fitted),'k-','LineWidth',2)
+        plot(1:num_times, squeeze(Y_cases(:,1,:)),'k--','LineWidth',2)
+        plot(1:num_times, squeeze(Y_cases(:,2,:)),'k--','LineWidth',2)
+
         hold on
         plot(1:num_times, obs_truth(1,:),'rx')
         legend('Fit','Data')
         subplot(1,2,2)
-        plot(1:num_times, squeeze(obs_fitted_h),'k--','LineWidth',2)
+        plot(1:num_times, squeeze(obs_fitted_h),'r-','LineWidth',2)
+        plot(1:num_times, squeeze(Y_deaths(:,1,:)),'r--','LineWidth',2)
+        plot(1:num_times, squeeze(Y_deaths(:,2,:)),'r--','LineWidth',2)
+
+        
         hold on
         plot(1:num_times, obs_truth_hosp(1,:),'bx')
         legend('Fit Hosp','Data Hosp')
         hold off
         drawnow
-    
     end
     parameters = theta(:,end); % estimated parameters
 end

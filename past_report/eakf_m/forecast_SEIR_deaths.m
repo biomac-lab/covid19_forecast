@@ -43,14 +43,14 @@ OHEV=zeros(num_loc,num_times);
 for l=1:num_loc
     for t=1:num_times
         obs_ave=mean(obs_truth_hosp(l,max(1,t-6):t));
-        OHEV(l,t)=max(5,obs_ave^2/20);
+        OHEV(l,t)=max(5, obs_ave^2/20);
     end
 end
 
 num_ens = 300;%number of ensemble
 pop0 = double(pop)*ones(1,num_ens);
 
-[x,paramax,paramin]=initialize_SEIHR_deaths(pop0, num_ens, 0, 1:size(pop,1)); %get parameter range
+[x,paramax,paramin] = initialize_SEIHR_deaths(pop0, num_ens, 0, 1:size(pop,1)); %get parameter range
 
 num_var=size(x,1);%number of state variables
 %IF setting
@@ -82,10 +82,10 @@ num_forecast = 90;
 num_var = size(x,1);
 
 
-x_post  = load(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', '200_x_post'));
+x_post  = load(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', '100_x_post'));
 x_post  = x_post.x_post;
 
-para_post  = load(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', '200_para_post_mean'));
+para_post  = load(strcat('/Users/chaosdonkey06/Dropbox/BIOMAC/EAKF_Forecast/bogota/checkpoints_agg/', '100_para_post_mean'));
 para_post  = para_post.para_post_mean;
 theta      = squeeze(mean(para_post,3));
 

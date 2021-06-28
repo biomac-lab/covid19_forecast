@@ -15,13 +15,13 @@ obslow=0;obsup=0; %reported case
 obsHlow=0;obsHup=0; %reported hospitalizations
 
 betalow=0.8;betaup=1.5; %transmission rate
-mulow=0.4;muup=0.6; %relative transmissibility
+mulow=0.4;muup=0.55; %relative transmissibility
 thetalow=1;thetaup=1.75; %movement factor
 Zlow=3;Zup=4;  %latency period
-alphalow=0.02;alphaup=1.0; %reporting rate
+alphalow=0.02;alphaup=0.5; %reporting rate
 Dlow=3; Dup=4;  %infectious period
-Llow=7; Lup=14; %hospitalization period
-IFRlow = 0.0001; IFRup=0.03; %hospitalization period
+Llow=10; Lup=14; %hospitalization period
+IFRlow = 0.005; IFRup=0.02; %hospitalization period
 
 num_state_var = 7;
 

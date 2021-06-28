@@ -120,7 +120,6 @@ df_response.to_csv(os.path.join(path_to_save, 'recovered_percentage.csv'))
 fig, ax = plt.subplots(1, 1, figsize=(12.5, 7))
 ax.plot(df_response.index.values, df_response["mean"], color='teal', alpha=0.4)
 ax.fill_between(df_response.index.values, df_response["low_975"], df_response["high_975"], color='teal', alpha=0.6, label='95 % CI')
-
 ax.xaxis.set_major_locator(mdates.MonthLocator())
 ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))
 ax.xaxis.set_minor_locator(mdates.DayLocator())
@@ -137,8 +136,7 @@ ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.1f} %"))
 ax.set_ylabel(r'Recovered Fraction $R(t)/N$', fontsize=15)
 ax.legend(loc='upper left')
 fig.savefig(os.path.join(path_to_save, 'parameters','recovered.png'),  dpi=300,  bbox_inches='tight', transparent=False)
-plt.close()
-
+plt.show()
 
 
 detection_rate = para_post[4,:,:]
@@ -184,7 +182,6 @@ ax.plot(variables_csv.index.values, (variables_csv["A"]+variables_csv["I"]+varia
 
 
 #ax.plot(data.index.values, data["infected_mean"], color="red", label="Total infected")
-
 ax.plot(data.index.values, data["smoothed_confirmed"], color='blue', label="Reported cases")
 
 ax.xaxis.set_major_locator(mdates.MonthLocator())

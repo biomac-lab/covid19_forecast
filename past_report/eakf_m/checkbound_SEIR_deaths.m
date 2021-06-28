@@ -1,13 +1,13 @@
 function x = checkbound_SEIHR(x,pop)
 %S,E,Is,Ia,obs,...,beta,mu,theta,Z,alpha,D
 betalow=0.8;betaup=1.5; %transmission rate
-mulow=0.4;muup=0.6; %relative transmissibility
+mulow=0.4;muup=0.55; %relative transmissibility
 thetalow=1;thetaup=1.75; %movement factor
 Zlow=3;Zup=4;  %latency period
-alphalow=0.02;alphaup=1.0; %reporting rate
+alphalow=0.02;alphaup=0.5; %reporting rate
 Dlow=3; Dup=4;  %infectious period
-Llow=7; Lup=14; %hospitalization period
-IFRlow=0.1/100; IFRup=2/100; %hospitalization period
+Llow=10; Lup=14; %hospitalization period
+IFRlow = 0.005; IFRup=0.02; %hospitalization period
 
 xmin=[betalow;mulow;thetalow;Zlow;alphalow;Dlow;Llow;IFRlow];
 xmax=[betaup;muup;thetaup;Zup;alphaup;Dup;Lup;IFRup];
