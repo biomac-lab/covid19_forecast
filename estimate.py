@@ -1,5 +1,3 @@
-# https://gather.town/app/VKRiIFXslfzfeqog/EEID_2021
-
 from functions.adjust_cases_functions import prepare_cases
 from functions.general_utils import  get_bool
 from models.seird_model import SEIRD
@@ -41,8 +39,9 @@ data  = prepare_cases(data, col='num_cases', cutoff=0)    # .rename({'smoothed_n
 data  = prepare_cases(data, col='num_diseased', cutoff=0) # .rename({'smoothed_num_cases':'num_cases'})
 data  = data.rename(columns={'smoothed_num_cases': 'confirmed', 'smoothed_num_diseased':'death'})[['confirmed', 'death']]
 
-
-
+fig, ax = plt.subplots(2,1, figsize=(15.5, 7.2))
+ax[0].plot(data.index.values, data.confirmed, color='k')
+ax[1].plot(data.index.values, data.death, color='k')
 
 print("**** **** Last day uploaded {}".format(pd.to_datetime(data.index.values[-1]).strftime('%Y-%b-%d')))
 
